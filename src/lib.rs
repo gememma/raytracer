@@ -7,7 +7,6 @@ pub mod light;
 pub mod linedrawer;
 pub mod material;
 pub mod object;
-pub mod polymesh_object;
 pub mod ray;
 pub mod scene;
 pub mod transform;

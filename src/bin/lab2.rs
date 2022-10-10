@@ -1,7 +1,8 @@
 use indicatif::ProgressBar;
 use raytracer::framebuffer::FrameBuffer;
 use raytracer::linedrawer::draw_line;
-use raytracer::polymesh_object::PolyMesh;
+use raytracer::object::polymesh::PolyMesh;
+use raytracer::object::Object;
 use raytracer::transform::Transform;
 
 fn main() {
@@ -18,7 +19,7 @@ fn main() {
 
     // read in model
     let mut mesh = PolyMesh::new("teapot_smaller.ply", false);
-    mesh.apply_transform(t);
+    mesh.apply_transform(&t);
 
     // draw each triangle in the model
     for i in 0..mesh.triangle_count {
