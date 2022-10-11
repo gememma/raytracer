@@ -52,12 +52,11 @@ fn build_scene(scene: &mut Scene) {
     );
 
     // Read in the teapot model.
-    // let mut pm = PolyMesh::new("teapot_smaller.ply", false);
-    // pm.apply_transform(&transform);
-    let mut pm = PolyMesh::new("teapot.ply", false);
+    let mut pm = PolyMesh::new("teapot_smaller.ply", false);
+    // let mut pm = PolyMesh::new("teapot.ply", false);
     pm.apply_transform(&transform);
 
-    let mut sphere = Sphere::new(Vertex::from_xyz(0., 0., 1.), 0.4);
+    let mut sphere = Sphere::new(Vertex::from_xyz(0., 1.5, 3.), 0.4);
 
     // let dl = DirectionalLight::new(
     //     Vector::new(1.01, -1., 1.),
@@ -85,7 +84,7 @@ fn build_scene(scene: &mut Scene) {
 
     // sphere.set_material(Box::new(bp2));
 
-    // scene.add_object(sphere);
+    scene.add_object(sphere);
 }
 
 // This is the entry point function to the program.
