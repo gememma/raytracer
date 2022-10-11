@@ -116,8 +116,56 @@ impl Object for PolyMesh {
         self.material = material;
     }
 
-    fn intersection(&self, _ray: &Ray) -> Vec<Hit> {
-        todo!("you must implement polymesh-ray intersection")
+    fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+        let mut hits = vec![];
+        let epsilon = 0.0000001;
+        for &[i0, i1, i2] in &self.triangle_indices {
+            let v0 = self.vertices[i0];
+            let v1 = self.vertices[i1];
+            let v2 = self.vertices[i2];
+
+            let e1 = v1 - v0;
+            let e2 = v2 - v0;
+            let h = ray.direction.cross(e2);
+            let a = e1.dot(h);
+            // println!("{:?}", ray.direction);
+            if a > -epsilon && a < epsilon {
+                continue;
+            }
+
+            // println!("a is {a}");
+
+            let f = 1. / a;
+            let s = ray.position - v0;
+            let u = f * s.dot(h);
+            if u < 0. || u > 1. {
+                continue;
+            }
+            // println!("u is {u}");
+
+            let q = s.cross(e1);
+            let v = f * ray.direction.dot(q);
+            if v < 0. || u + v > 1. {
+                continue;
+            }
+            // println!("v is {v}");
+
+            let t = f * e2.dot(q);
+            if t > epsilon {
+                // ray intersects current triangle
+                let entering = a <= -epsilon;
+                // println!("{t}");
+                let h = Hit {
+                    t,
+                    entering,
+                    what: self,
+                    position: ray.position + ray.direction * t,
+                    normal: h,
+                };
+                hits.push(h);
+            }
+        }
+        hits
     }
 
     fn apply_transform(&mut self, t: &Transform) {

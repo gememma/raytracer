@@ -51,9 +51,10 @@ impl Default for Vector {
 
 impl Vector {
     pub fn normalise(&mut self) {
-        self.x /= self.length();
-        self.y /= self.length();
-        self.z /= self.length();
+        let length = self.length();
+        self.x /= length;
+        self.y /= length;
+        self.z /= length;
     }
 
     pub fn normalised(&self) -> Self {

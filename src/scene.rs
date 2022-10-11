@@ -67,15 +67,21 @@ impl Scene {
 
     /// Filter the list of returned hits to the closest +ve.
     pub fn select_first(hits: Vec<Hit>) -> Option<Hit> {
-        let mut result = None;
+        let mut result: Option<Hit> = None;
 
         for hit in hits {
-            if hit.t >= 0. {
+            // if hit.t >= 0. {
+            //     result = Some(hit);
+            //     break;
+            // }
+            if let Some(h) = &result {
+                if hit.t < h.t && hit.t >= 0. {
+                    result = Some(hit);
+                }
+            } else if hit.t >= 0. {
                 result = Some(hit);
-                break;
             }
         }
-
         result
     }
 }

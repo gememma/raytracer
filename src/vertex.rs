@@ -119,14 +119,9 @@ impl Vertex {
 }
 
 impl Sub<Vertex> for Vertex {
-    type Output = Self;
+    type Output = Vector;
 
     fn sub(self, rhs: Vertex) -> Self::Output {
-        Self::from_xyzw(
-            self.x - rhs.x,
-            self.y - rhs.y,
-            self.z - rhs.z,
-            self.w - rhs.w,
-        )
+        Vector::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }

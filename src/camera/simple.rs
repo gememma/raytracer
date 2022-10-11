@@ -37,8 +37,8 @@ impl Default for SimpleCamera {
     /// This is the equivalent of the default (no-argument) constructor from the C++ version.
     fn default() -> Self {
         Self {
-            width: 0.,
-            height: 0.,
+            width: 512.,
+            height: 512.,
             fov: 0.5,
         }
     }
@@ -56,6 +56,7 @@ impl SimpleCamera {
     pub fn get_ray_pixel(&self, x: usize, y: usize) -> Ray {
         let fx = (x as f32 + 0.5) / self.width;
         let fy = (y as f32 + 0.5) / self.height;
+        // println!("{fx:?}, {fy:?}");
 
         Ray::new(
             Vertex::from_xyzw(0., 0., 0., 1.),
@@ -79,7 +80,7 @@ impl Camera for SimpleCamera {
                 fb.plot_depth(x, y, depth);
             }
 
-            eprint!("#");
+            // eprint!("#");
         }
     }
 }

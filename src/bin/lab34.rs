@@ -54,33 +54,33 @@ fn build_scene(scene: &mut Scene) {
     let mut pm = PolyMesh::new("teapot_smaller.ply", false);
     pm.apply_transform(&transform);
 
-    let mut sphere = Sphere::new(Vertex::from_xyz(0., 0., 1.), 0.4);
+    let mut sphere = Sphere::new(Vertex::from_xyz(0., 1., 4.), 0.4);
 
-    let dl = DirectionalLight::new(
-        Vector::new(1.01, -1., 1.),
-        Colour::from_rgba(1., 1., 1., 0.),
-    );
+    // let dl = DirectionalLight::new(
+    //     Vector::new(1.01, -1., 1.),
+    //     Colour::from_rgba(1., 1., 1., 0.),
+    // );
+    //
+    // scene.add_light(dl);
 
-    scene.add_light(dl);
+    // let bp1 = Phong::new(
+    //     Colour::from_rgb(0.2, 0., 0.),
+    //     Colour::from_rgb(0.4, 0., 0.),
+    //     Colour::from_rgb(0.4, 0.4, 0.4),
+    //     40.,
+    // );
+    // let bp2 = Phong::new(
+    //     Colour::from_rgb(0.01, 0.01, 0.01),
+    //     Colour::from_rgb(0., 0., 0.),
+    //     Colour::from_rgb(0.5, 0.5, 0.5),
+    //     40.,
+    // );
 
-    let bp1 = Phong::new(
-        Colour::from_rgb(0.2, 0., 0.),
-        Colour::from_rgb(0.4, 0., 0.),
-        Colour::from_rgb(0.4, 0.4, 0.4),
-        40.,
-    );
-    let bp2 = Phong::new(
-        Colour::from_rgb(0.01, 0.01, 0.01),
-        Colour::from_rgb(0., 0., 0.),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
-
-    pm.set_material(Box::new(bp1));
+    // pm.set_material(Box::new(bp1));
 
     scene.add_object(pm);
 
-    sphere.set_material(Box::new(bp2));
+    // sphere.set_material(Box::new(bp2));
 
     scene.add_object(sphere);
 }
@@ -116,5 +116,5 @@ fn main() {
     fb.write_depth_file("depth.ppm")
         .expect("failed to write depth output to PPM file");
 
-    eprintln!("\nDone.");
+    // eprintln!("\nDone.");
 }
