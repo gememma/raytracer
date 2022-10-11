@@ -23,6 +23,7 @@ fn main() {
             (256. + (240. * y)) as i32,
         );
     }
+
     bar.finish();
     // output framebuffer
     f.write_rgb_file("test.ppm")

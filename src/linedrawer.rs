@@ -25,7 +25,9 @@ fn draw_x_line(f: &mut FrameBuffer, mut sx: i32, mut sy: i32, mut ex: i32, mut e
     let mut fy = dy / 2;
 
     while x != ex {
-        f.plot_pixel(x as usize, y as usize, 1., 1., 1.);
+        if (y as usize) < f.height() && (x as usize) < f.width() {
+            f.plot_pixel(x as usize, y as usize, 1., 1., 1.);
+        }
         x += 1;
         fy += dy;
         if fy > dx {
@@ -49,7 +51,9 @@ fn draw_y_line(f: &mut FrameBuffer, mut sx: i32, mut sy: i32, mut ex: i32, mut e
     let mut fx = dx / 2;
 
     while y != ey {
-        f.plot_pixel(x as usize, y as usize, 1., 1., 1.);
+        if (y as usize) < f.height() && (x as usize) < f.width() {
+            f.plot_pixel(x as usize, y as usize, 1., 1., 1.);
+        }
         y += 1;
         fx += dx;
         if fx > dy {
