@@ -51,7 +51,7 @@ pub struct Hit<'obj> {
 /// print a hit using the `{}` format specifier, e.g.:
 ///
 /// ```
-/// # use krt::{
+/// # use raytracer::{
 /// #     hit::Hit,
 /// #     object::{Object, sphere::Sphere},
 /// #     vertex::Vertex,

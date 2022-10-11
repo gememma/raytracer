@@ -90,34 +90,6 @@ impl Neg for Vertex {
 // coursework, and please don't forget to thank Ken for letting you use this starter code instead
 // of the C++ version! He was under no obligation to provide this to you.
 
-impl Vertex {
-    pub fn normalise(&mut self) {
-        self.x /= self.length();
-        self.y /= self.length();
-        self.z /= self.length();
-    }
-
-    pub fn normalised(&self) -> Self {
-        let mut normalised = self.clone();
-        normalised.normalise();
-        normalised
-    }
-
-    pub fn len_sqr(&self) -> f32 {
-        self.x.powf(2.) + self.y.powf(2.) + self.z.powf(2.)
-    }
-
-    pub fn length(&self) -> f32 {
-        (self.len_sqr() as f64).sqrt() as f32
-    }
-
-    pub fn negate(&mut self) {
-        self.x = -self.x;
-        self.y = -self.y;
-        self.z = -self.z;
-    }
-}
-
 impl Sub<Vertex> for Vertex {
     type Output = Vector;
 

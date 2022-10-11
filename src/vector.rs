@@ -165,8 +165,6 @@ impl Neg for Vector {
 /// Convert a [`Vertex`] to a [`Vector`], normalising the vertex first.
 impl From<Vertex> for Vector {
     fn from(mut vertex: Vertex) -> Self {
-        vertex.normalise();
-
         Self {
             x: vertex.x,
             y: vertex.y,

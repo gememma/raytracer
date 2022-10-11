@@ -25,6 +25,7 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
+use raytracer::camera::full::FullCamera;
 use raytracer::{
     camera::{simple::SimpleCamera, Camera},
     colour::Colour,
@@ -51,10 +52,12 @@ fn build_scene(scene: &mut Scene) {
     );
 
     // Read in the teapot model.
-    let mut pm = PolyMesh::new("teapot_smaller.ply", false);
+    // let mut pm = PolyMesh::new("teapot_smaller.ply", false);
+    // pm.apply_transform(&transform);
+    let mut pm = PolyMesh::new("teapot.ply", false);
     pm.apply_transform(&transform);
 
-    let mut sphere = Sphere::new(Vertex::from_xyz(0., 1., 4.), 0.4);
+    let mut sphere = Sphere::new(Vertex::from_xyz(0., 0., 1.), 0.4);
 
     // let dl = DirectionalLight::new(
     //     Vector::new(1.01, -1., 1.),
@@ -82,7 +85,7 @@ fn build_scene(scene: &mut Scene) {
 
     // sphere.set_material(Box::new(bp2));
 
-    scene.add_object(sphere);
+    // scene.add_object(sphere);
 }
 
 // This is the entry point function to the program.
@@ -99,13 +102,15 @@ fn main() {
     build_scene(&mut scene);
 
     // Declare a camera
-    let camera = SimpleCamera::with_fov(0.5);
-    // let camera = krt::camera::full::FullCamera::new(
-    //     0.5,
-    //     Vertex::from_xyz(-1., 0., 0.),
-    //     Vector::new(1., 0., 1.),
-    //     Vector::new(0., 1., 0.),
-    // );
+    // let camera = SimpleCamera::with_fov(0.5);
+    let camera = FullCamera::new(
+        0.5,
+        Vertex::from_xyz(0., 0., 0.),
+        Vertex::from_xyz(0., 0., 1.),
+        Vector::new(0., 1., 0.),
+        width,
+        height,
+    );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
     camera.render(&scene, &mut fb);

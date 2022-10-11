@@ -96,7 +96,7 @@ impl Object for Sphere {
                 what: self,
                 position: position0,
                 // This gets normalised inside the implementation of From<Vertex> for Vector.
-                normal: (position0 - self.center).into(),
+                normal: (position0 - self.center).normalised(),
             };
 
             if hit0.normal.dot(ray.direction) > 0. {
@@ -110,7 +110,7 @@ impl Object for Sphere {
                 what: self,
                 position: position1,
                 // This gets normalised inside the implementation of From<Vertex> for Vector.
-                normal: (position1 - self.center).into(),
+                normal: (position1 - self.center).normalised(),
             };
 
             if hit1.normal.dot(ray.direction) > 0. {

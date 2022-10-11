@@ -56,7 +56,6 @@ impl SimpleCamera {
     pub fn get_ray_pixel(&self, x: usize, y: usize) -> Ray {
         let fx = (x as f32 + 0.5) / self.width;
         let fy = (y as f32 + 0.5) / self.height;
-        // println!("{fx:?}, {fy:?}");
 
         Ray::new(
             Vertex::from_xyzw(0., 0., 0., 1.),
@@ -79,8 +78,6 @@ impl Camera for SimpleCamera {
                 fb.plot_pixel(x, y, colour.r, colour.g, colour.b);
                 fb.plot_depth(x, y, depth);
             }
-
-            // eprint!("#");
         }
     }
 }

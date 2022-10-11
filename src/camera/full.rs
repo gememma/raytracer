@@ -35,9 +35,10 @@ pub struct FullCamera {
     pub height: usize,
     pub fov: f32,
     pub position: Vertex,
-    pub lookat: Vector,
-    pub up: Vector,
-    pub right: Vector,
+    pub w: Vector,
+    pub v: Vector,
+    pub u: Vector,
+    bottom_left_pixel: Vector,
 }
 
 impl Default for FullCamera {
@@ -49,21 +50,62 @@ impl Default for FullCamera {
 
 impl FullCamera {
     /// This is the equivalent of the four-argument constructor from the C++ version.
-    pub fn new(_fov: f32, _position: Vertex, _lookat: Vector, _up: Vector) -> Self {
-        todo!("you must implement the parameterised constructor for FullCamera")
+    pub fn new(
+        fov: f32,
+        position: Vertex,
+        look: Vertex,
+        up: Vector,
+        width: usize,
+        height: usize,
+    ) -> Self {
+        let w = (look - position).normalised();
+        let u = (up.cross(w)).normalised();
+        let v = w.cross(u);
+
+        let horizontal = Vector::new(0.5, 0., 0.);
+        let vertical = Vector::new(0., 0.5, 0.);
+        let bottom_left_pixel =
+            Vector::from(position) - horizontal - vertical + Vector::new(0., 0., fov);
+
+        Self {
+            width,
+            height,
+            fov,
+            position,
+            w,
+            v,
+            u,
+            bottom_left_pixel,
+        }
     }
 
-    pub fn get_ray_offset(_x: usize, _y: usize, _ox: f32, _oy: f32) -> Ray {
+    pub fn get_ray_offset(&self, _x: usize, _y: usize, _ox: f32, _oy: f32) -> Ray {
         todo!("you must implement getting a ray with offsets for FullCamera")
     }
 
-    pub fn get_ray_pixel(_x: usize, _y: usize) -> Ray {
-        todo!("you must implement getting a ray for a pixel for FullCamera")
+    pub fn get_ray_pixel(&self, x: usize, y: usize) -> Ray {
+        Ray::new(
+            self.position,
+            (self.bottom_left_pixel
+                + x as f32 / self.width as f32 * self.u
+                + y as f32 / self.height as f32 * self.v
+                - self.position.into())
+            .normalised(),
+        )
     }
 }
 
 impl Camera for FullCamera {
-    fn render<E: Environment>(&self, _env: &E, _fb: &mut FrameBuffer) {
-        todo!("you must implement rendering an environment with a FullCamera")
+    fn render<E: Environment>(&self, env: &E, fb: &mut FrameBuffer) {
+        for y in 0..fb.height() {
+            for x in 0..fb.width() {
+                let ray = self.get_ray_pixel(x, y);
+
+                let (colour, depth) = env.raytrace(ray, 5);
+
+                fb.plot_pixel(x, fb.height() - y - 1, colour.r, colour.g, colour.b);
+                fb.plot_depth(x, fb.height() - y - 1, depth);
+            }
+        }
     }
 }

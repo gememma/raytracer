@@ -20,6 +20,7 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
+use crate::vector::Vector;
 use crate::{
     colour::Colour, environment::Environment, hit::Hit, light::Light, object::Object, ray::Ray,
 };
@@ -117,7 +118,7 @@ impl Environment for Scene {
 
             // next, compute the light contribution for each light in the scene.
             for light in &self.light_list {
-                let viewer = -best.position.normalised();
+                let viewer = -Vector::from(best.position).normalised();
 
                 let (ldir, mut lit) = light.get_direction(best.position);
 

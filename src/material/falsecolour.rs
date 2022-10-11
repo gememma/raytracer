@@ -34,7 +34,7 @@ impl Material for FalseColour {
         Colour::from_rgb(
             (hit.normal.x + 1.) * 0.5,
             (hit.normal.y + 1.) * 0.5,
-            (hit.normal.z + 1.) * 0.5,
+            (-hit.normal.z + 1.) * 0.5,
         )
     }
 
