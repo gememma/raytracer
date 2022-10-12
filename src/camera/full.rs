@@ -62,10 +62,13 @@ impl FullCamera {
         let u = (up.cross(w)).normalised();
         let v = w.cross(u);
 
-        let horizontal = Vector::new(0.5, 0., 0.);
-        let vertical = Vector::new(0., 0.5, 0.);
-        let bottom_left_pixel =
-            Vector::from(position) - horizontal - vertical + Vector::new(0., 0., fov);
+        // let horizontal = Vector::new(0.5, 0., 0.);
+        // let vertical = Vector::new(0., 0.5, 0.);
+
+        let horizontal = 0.5 * u;
+        let vertical = 0.5 * v;
+
+        let bottom_left_pixel = Vector::from(position) - horizontal - vertical + fov * w;
 
         Self {
             width,

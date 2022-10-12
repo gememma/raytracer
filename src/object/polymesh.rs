@@ -41,12 +41,13 @@ pub struct PolyMesh {
     pub vertices: Vec<Vertex>,
     pub triangle_indices: Vec<TriangleIndex>,
     pub smoothing: bool,
+    pub one_ind: bool,
     material: Box<dyn Material>,
 }
 
 impl PolyMesh {
     /// This is the equivalent of the two-argument constructor from the C++ version.
-    pub fn new(filename: &str, smoothing: bool) -> Self {
+    pub fn new(filename: &str, smoothing: bool, one_ind: bool) -> Self {
         let contents = fs::read_to_string(filename).expect("Should read the file");
         let mut lines = contents.lines();
         if lines.next() != Some("kcply") {
@@ -102,6 +103,7 @@ impl PolyMesh {
             vertices,
             triangle_indices,
             smoothing,
+            one_ind,
             material: Box::new(FalseColour::default()),
         }
     }
@@ -120,9 +122,12 @@ impl Object for PolyMesh {
         let mut hits = vec![];
         let epsilon = 0.0000001;
         for &[i0, i1, i2] in &self.triangle_indices {
-            let v0 = self.vertices[i0];
-            let v1 = self.vertices[i1];
-            let v2 = self.vertices[i2];
+            // if the .ply file is 1-indexed, adjust accordingly
+            let n = if self.one_ind { 1 } else { 0 };
+
+            let v0 = self.vertices[i0 - n];
+            let v1 = self.vertices[i1 - n];
+            let v2 = self.vertices[i2 - n];
 
             let plane_point = v0;
             let plane_normal = (v1 - v0).cross(v2 - v0).normalised();
