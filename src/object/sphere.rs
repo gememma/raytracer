@@ -95,7 +95,6 @@ impl Object for Sphere {
                 entering: true,
                 what: self,
                 position: position0,
-                // This gets normalised inside the implementation of From<Vertex> for Vector.
                 normal: (position0 - self.center).normalised(),
             };
 
