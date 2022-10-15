@@ -107,54 +107,6 @@ impl PolyMesh {
             material: Box::new(FalseColour::default()),
         }
     }
-
-    fn intersection_alt(&self, ray: &Ray) -> Vec<Hit> {
-        let mut hits = vec![];
-        let epsilon = 0.0000001;
-        for &[i0, i1, i2] in &self.triangle_indices {
-            // if the .ply file is 1-indexed, adjust accordingly
-            let n = if self.one_ind { 1 } else { 0 };
-
-            let v0 = self.vertices[i0 - n];
-            let v1 = self.vertices[i1 - n];
-            let v2 = self.vertices[i2 - n];
-
-            let plane_point = v0;
-            let plane_normal = (v1 - v0).cross(v2 - v0).normalised();
-            let denominator = plane_normal.dot(ray.direction);
-            if denominator >= -epsilon && denominator <= epsilon {
-                // triangle is parallel to ray
-                continue;
-            }
-
-            let numerator = (plane_point - ray.position).dot(plane_normal);
-            let plane_t = numerator / denominator;
-            if plane_t < 0. {
-                // triangle is behind start of ray
-                continue;
-            }
-
-            let i = ray.position + plane_t * ray.direction;
-            let (ai, bi, ci) = (i - v0, i - v1, i - v2);
-            let (ab, bc, ca) = (v1 - v0, v2 - v1, v0 - v2);
-            let (cross_a, cross_b, cross_c) = (ab.cross(ai), bc.cross(bi), ca.cross(ci));
-            let n = plane_normal;
-            let (dota, dotb, dotc) = (cross_a.dot(n), cross_b.dot(n), cross_c.dot(n));
-
-            if dota >= -epsilon && dotb >= -epsilon && dotc >= -epsilon {
-                let entering = plane_normal.dot(ray.direction) < 0.;
-                let h = Hit {
-                    t: plane_t,
-                    entering,
-                    what: self,
-                    position: ray.position + ray.direction * plane_t,
-                    normal: -plane_normal.normalised(),
-                };
-                hits.push(h);
-            }
-        }
-        hits
-    }
 }
 
 impl Object for PolyMesh {

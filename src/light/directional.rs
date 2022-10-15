@@ -53,7 +53,7 @@ impl DirectionalLight {
 
 impl Light for DirectionalLight {
     fn get_direction(&self, _surface: Vertex) -> (Vector, bool) {
-        (self.direction, true)
+        (-self.direction, true)
     }
 
     fn get_intensity(&self, _surface: Vertex) -> Colour {

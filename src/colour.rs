@@ -111,7 +111,7 @@ impl Add<&Colour> for Colour {
             self.r + rhs.r,
             self.g + rhs.g,
             self.b + rhs.b,
-            self.a + rhs.a,
+            (self.a + rhs.a).clamp(0., 1.),
         )
     }
 }

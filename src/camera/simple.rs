@@ -73,7 +73,7 @@ impl Camera for SimpleCamera {
             for x in 0..fb.width() {
                 let ray = self.get_ray_pixel(x, y);
 
-                let (colour, depth) = env.raytrace(ray, 5);
+                let (colour, depth) = env.raytrace(ray, 5, Vertex::default());
 
                 fb.plot_pixel(x, y, colour.r, colour.g, colour.b);
                 fb.plot_depth(x, y, depth);

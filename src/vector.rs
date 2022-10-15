@@ -75,14 +75,15 @@ impl Vector {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    pub fn reflection(&self, initial: Self) -> Self {
-        let d = self.dot(initial) * 2.;
+    pub fn reflection(&self, incident: Self) -> Self {
+        // let d = self.dot(incident) * 2.;
+        // Self::new(
+        //     initial.x - d * self.x,
+        //     initial.y - d * self.y,
+        //     initial.z - d * self.z,
+        // )
 
-        Self::new(
-            initial.x - d * self.x,
-            initial.y - d * self.y,
-            initial.z - d * self.z,
-        )
+        incident.normalised() - 2. * self.normalised() * incident.dot(*self)
     }
 
     pub fn negate(&mut self) {

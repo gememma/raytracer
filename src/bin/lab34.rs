@@ -67,31 +67,32 @@ fn build_scene(scene: &mut Scene) {
 
     let mut sphere = Sphere::new(Vertex::from_xyz(0., 1.3, 1.), 0.8);
 
-    // let dl = DirectionalLight::new(
-    //     Vector::new(1.01, -1., 1.),
-    //     Colour::from_rgba(1., 1., 1., 0.),
-    // );
-    //
-    // scene.add_light(dl);
+    let dl = DirectionalLight::new(
+        Vector::new(0.5, -1., 0.5),
+        Colour::from_rgba(1., 1., 1., 0.),
+    );
 
-    // let bp1 = Phong::new(
-    //     Colour::from_rgb(0.2, 0., 0.),
-    //     Colour::from_rgb(0.4, 0., 0.),
-    //     Colour::from_rgb(0.4, 0.4, 0.4),
-    //     40.,
-    // );
-    // let bp2 = Phong::new(
-    //     Colour::from_rgb(0.01, 0.01, 0.01),
-    //     Colour::from_rgb(0., 0., 0.),
-    //     Colour::from_rgb(0.5, 0.5, 0.5),
-    //     40.,
-    // );
+    scene.add_light(dl);
 
-    // pm.set_material(Box::new(bp1));
+    let bp1 = Phong::new(
+        Colour::from_rgb(0.2, 0., 0.),
+        Colour::from_rgb(0.4, 0., 0.),
+        Colour::from_rgb(0.4, 0.4, 0.4),
+        40.,
+    );
+
+    let bp2 = Phong::new(
+        Colour::from_rgb(0., 0.15, 0.3),
+        Colour::from_rgb(0., 0.05, 0.15),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+
+    pm.set_material(Box::new(bp1));
 
     scene.add_object(pm);
 
-    // sphere.set_material(Box::new(bp2));
+    sphere.set_material(Box::new(bp2));
 
     scene.add_object(sphere);
 }

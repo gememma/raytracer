@@ -21,6 +21,7 @@
 //! same copyright and conditions as the original C++ implementation.
 
 use crate::vector::Vector;
+use crate::vertex::Vertex;
 use crate::{
     colour::Colour, environment::Environment, hit::Hit, light::Light, object::Object, ray::Ray,
 };
@@ -69,12 +70,13 @@ impl Scene {
     /// Filter the list of returned hits to the closest +ve.
     pub fn select_first(hits: Vec<Hit>) -> Option<Hit> {
         let mut result: Option<Hit> = None;
-
+        // for hit in hits {
+        //     if hit.t >= 0. {
+        //         result = Some(hit);
+        //         break;
+        //     }
+        // }
         for hit in hits {
-            // if hit.t >= 0. {
-            //     result = Some(hit);
-            //     break;
-            // }
             if let Some(h) = &result {
                 if hit.t < h.t && hit.t >= 0. {
                     result = Some(hit);
@@ -92,18 +94,17 @@ impl Environment for Scene {
     fn shadowtrace(&self, ray: &Ray, limit: f32) -> bool {
         for object in &self.object_list {
             if let Some(hit) = Self::select_first(object.intersection(ray)) {
-                if hit.t > 0.00000001 && hit.t < limit {
+                if hit.t > 0.0000001 && hit.t < limit {
                     return true;
                 }
             }
         }
-
         return false;
     }
 
     /// Trace a [`Ray`] through the scene and return its [`Colour`]. This function is the one that
     /// should recurse down the reflection/refraction tree within a material.
-    fn raytrace(&self, ray: Ray, recurse: usize) -> (Colour, f32) {
+    fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
         // a default colour if we hit nothing.
         let mut colour = Colour::from_rgba(0., 0., 0., 0.);
         let mut depth = 0.;
@@ -118,27 +119,31 @@ impl Environment for Scene {
 
             // next, compute the light contribution for each light in the scene.
             for light in &self.light_list {
-                let viewer = -Vector::from(best.position).normalised();
+                let viewer = (viewer - best.position).normalised();
 
+                // ldir is direction towards the light
                 let (ldir, mut lit) = light.get_direction(best.position);
 
-                if ldir.dot(best.normal) > 0. {
+                if ldir.dot(best.normal) < 0. {
                     // Light is facing wrong way.
                     lit = false;
                 }
 
-                // TODO: Put the shadow check here, if lit==true and in shadow, set lit==false
+                if lit {
+                    lit = !self.shadowtrace(
+                        &Ray::new(best.position + 0.0001 * ldir, ldir),
+                        f32::INFINITY,
+                    );
+                }
 
                 if lit {
                     let intensity = light.get_intensity(best.position);
-                    colour += intensity
-                        * best
-                            .what
-                            .material()
-                            .compute_per_light(viewer.into(), &best, ldir);
+                    colour +=
+                        intensity * best.what.material().compute_per_light(viewer, &best, ldir);
                 }
             }
         } else {
+            // background colour
             colour.r = 0.;
             colour.g = 0.;
             colour.b = 0.;

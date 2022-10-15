@@ -20,6 +20,7 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
+use crate::vertex::Vertex;
 use crate::{colour::Colour, ray::Ray};
 
 /// Environment is the trait implemented by anything that can perform raytracing. We use this in
@@ -29,7 +30,7 @@ use crate::{colour::Colour, ray::Ray};
 pub trait Environment {
     /// Shoot a [`Ray`] into the environment and get the colour and depth. `recurse` indicates the
     /// level of recursion permitted.
-    fn raytrace(&self, ray: Ray, recurse: usize) -> (Colour, f32);
+    fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32);
 
     /// Raytrace a shadow ray. Returns `true` if intersection found between 0 and `limit` along
     /// ray.

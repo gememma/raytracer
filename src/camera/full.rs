@@ -100,7 +100,7 @@ impl Camera for FullCamera {
             for x in 0..fb.width() {
                 let ray = self.get_ray_pixel(x, y);
 
-                let (colour, depth) = env.raytrace(ray, 5);
+                let (colour, depth) = env.raytrace(ray, 5, self.position);
 
                 fb.plot_pixel(x, fb.height() - y - 1, colour.r, colour.g, colour.b);
                 fb.plot_depth(x, fb.height() - y - 1, depth);
