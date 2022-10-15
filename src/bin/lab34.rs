@@ -25,6 +25,7 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
+use rand::Rng;
 use raytracer::camera::full::FullCamera;
 use raytracer::{
     camera::{simple::SimpleCamera, Camera},
@@ -42,8 +43,7 @@ use raytracer::{
 /// You will find it useful during development/debugging to create multiple functions that fill out
 /// the scene.
 fn build_scene(scene: &mut Scene) {
-    // The following transform allows 4D homogeneous coordinates to be transformed. It moves the
-    // supplied teapot model to somewhere visible.
+    // Create objects
     let transform = Transform::new(
         [1., 0., 0., 0.],
         [0., 0., 1., -2.7],
@@ -65,8 +65,10 @@ fn build_scene(scene: &mut Scene) {
     // let mut pm = PolyMesh::new("teapot_smaller.ply", false, false);
     pm.apply_transform(&transform);
 
-    let mut sphere = Sphere::new(Vertex::from_xyz(0., 1.3, 1.), 0.8);
+    // let mut sphere = Sphere::new(Vertex::from_xyz(0., 1.3, 1.), 0.8);
+    let mut sphere = spawn_sphere(Vector::new(-1., -1., -1.), Vector::new(1., 1., 1.), 2.);
 
+    // Create lighting
     let dl = DirectionalLight::new(
         Vector::new(0.5, -1., 0.5),
         Colour::from_rgba(1., 1., 1., 0.),
@@ -74,6 +76,7 @@ fn build_scene(scene: &mut Scene) {
 
     scene.add_light(dl);
 
+    // Create materials
     let bp1 = Phong::new(
         Colour::from_rgb(0.2, 0., 0.),
         Colour::from_rgb(0.4, 0., 0.),
@@ -129,4 +132,12 @@ fn main() {
         .expect("failed to write RGB output to PPM file");
     fb.write_depth_file("depth.ppm")
         .expect("failed to write depth output to PPM file");
+}
+
+fn spawn_sphere(min_pos: Vector, max_pos: Vector, max_rad: f32) -> Sphere {
+    let x = rand::thread_rng().gen_range(min_pos.x..max_pos.x);
+    let y = rand::thread_rng().gen_range(min_pos.y..max_pos.y);
+    let z = rand::thread_rng().gen_range(min_pos.z..max_pos.z);
+    let center = Vertex::from_xyz(x, y, z);
+    Sphere::new(center, rand::thread_rng().gen_range(0.2..max_rad))
 }
