@@ -1,6 +1,7 @@
+use glam::Vec3A;
+
 pub mod camera;
 pub mod colour;
-pub mod environment;
 pub mod framebuffer;
 pub mod hit;
 pub mod light;
@@ -9,6 +10,5 @@ pub mod material;
 pub mod object;
 pub mod ray;
 pub mod scene;
-pub mod transform;
-pub mod vector;
-pub mod vertex;
+
+pub type Vertex = Vec3A;

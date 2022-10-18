@@ -1,32 +1,7 @@
-//! This is the top level for the program you need to create for lab three and four.
-//!
-//! You can run this file using `cargo`:
-//!
-//! ```
-//! cargo run --bin lab34
-//! ```
-//!
-//! ---
-//!
-//! krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
-//!
-//! I've put a lot of time and effort into this code. For the last decade it's been used to
-//! introduce hundreds of students at multiple universities to raytracing. It forms the basis of
-//! your coursework but you are free to continue using/developing forever more. However, I ask that
-//! you don't share the code or your derivitive versions publicly. In order to continue
-//! to be used for coursework and in particular assessment it's important that versions containing
-//! solutions are not searchable on the web or easy to download.
-//!
-//! If you want to show off your programming ability, instead of releasing the code, consider
-//! generating an incredible image and explaining how you produced it.
-//!
-//! ---
-//!
-//! Rust reimplementation provided by a former student. This version is made available under the
-//! same copyright and conditions as the original C++ implementation.
-
+use glam::{Affine3A, Vec3A};
 use rand::Rng;
 use raytracer::camera::full::FullCamera;
+use raytracer::object::plane::Plane;
 use raytracer::{
     camera::{simple::SimpleCamera, Camera},
     colour::Colour,
@@ -35,69 +10,69 @@ use raytracer::{
     material::phong::Phong,
     object::{polymesh::PolyMesh, sphere::Sphere, Object},
     scene::Scene,
-    transform::Transform,
-    vector::Vector,
-    vertex::Vertex,
+    Vertex,
 };
+use std::f32::consts::PI;
 
-/// You will find it useful during development/debugging to create multiple functions that fill out
-/// the scene.
 fn build_scene(scene: &mut Scene) {
     // Create objects
-    let transform = Transform::new(
-        [1., 0., 0., 0.],
-        [0., 0., 1., -2.7],
-        [0., 1., 0., 5.],
-        [0., 0., 0., 1.],
+    let transform = Affine3A::from_cols(
+        Vec3A::new(1., 0., 0.),
+        Vec3A::new(0., 0., 1.),
+        Vec3A::new(0., 1., 0.),
+        Vec3A::new(0., -2.7, 4.),
     );
-    let transform2 = Transform::new(
-        [1., 0., 0., 0.],
-        [0., 0., -1., 0.],
-        [0., 1., 0., 0.],
-        [0., 0., 0., 1.],
-    );
+    let t2 = Affine3A::from_rotation_x(PI / 2.);
 
     // Read in the bigger teapot model
     let mut pm = PolyMesh::new("teapot.ply", false, true);
-    pm.apply_transform(&transform2);
+    pm.apply_transform(t2);
+    pm.apply_transform(transform);
 
-    // Read in the smaller teapot model
-    // let mut pm = PolyMesh::new("teapot_smaller.ply", false, false);
-    pm.apply_transform(&transform);
-
-    // let mut sphere = Sphere::new(Vertex::from_xyz(0., 1.3, 1.), 0.8);
-    let mut sphere = spawn_sphere(Vector::new(-1., -1., -1.), Vector::new(1., 1., 1.), 2.);
+    // let mut sphere = Sphere::new(Vertex::new(0., 1.3, 1.), 0.8);
+    let mut ground = Sphere::new(Vertex::new(0., -103.5, -1.), 100.);
 
     // Create lighting
-    let dl = DirectionalLight::new(
-        Vector::new(0.5, -1., 0.5),
-        Colour::from_rgba(1., 1., 1., 0.),
-    );
-
+    let dl = DirectionalLight::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
     scene.add_light(dl);
+    // let dl2 = DirectionalLight::new(
+    //     Vector::new(-0.3, -1., 0.75),
+    //     Colour::from_rgba(1., 0.6, 1., 0.),
+    // );
+    // scene.add_light(dl2);
 
-    // Create materials
+    // Create materials manually
     let bp1 = Phong::new(
         Colour::from_rgb(0.2, 0., 0.),
         Colour::from_rgb(0.4, 0., 0.),
         Colour::from_rgb(0.4, 0.4, 0.4),
         40.,
     );
-
-    let bp2 = Phong::new(
-        Colour::from_rgb(0., 0.15, 0.3),
-        Colour::from_rgb(0., 0.05, 0.15),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
-
     pm.set_material(Box::new(bp1));
-
     scene.add_object(pm);
 
-    sphere.set_material(Box::new(bp2));
+    let bp2 = Phong::new(
+        Colour::from_rgb(0., 0.3, 0.1),
+        Colour::from_rgb(0., 0.6, 0.2),
+        Colour::from_rgb(0.4, 0.4, 0.4),
+        40.,
+    );
+    ground.set_material(Box::new(bp2));
+    scene.add_object(ground);
 
-    scene.add_object(sphere);
+    // Create 9 random colour/size/position spheres
+    for _ in 1..15 {
+        let mut sphere = spawn_sphere(Vec3A::new(-1., 0., 5.), Vec3A::new(1., 2., 7.), 0.6);
+        let c = Colour::random(0.1, 0.7);
+        sphere.set_material(Box::new(Phong::new(
+            c * 0.6,
+            c,
+            Colour::from_rgb(0.5, 0.5, 0.5),
+            40.,
+        )));
+        // println!("{sphere:?}");
+        scene.add_object(sphere);
+    }
 }
 
 // This is the entry point function to the program.
@@ -117,15 +92,15 @@ fn main() {
     // let camera = SimpleCamera::with_fov(0.5);
     let camera = FullCamera::new(
         1.,
-        Vertex::from_xyz(0., 0., -4.),
-        Vertex::from_xyz(0., 0., 1.),
-        Vector::new(0., 1., 0.),
+        Vertex::new(0., 3., -4.),
+        Vertex::new(0., 0.5, 1.),
+        Vec3A::new(0., 1., 0.),
         width,
         height,
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
-    camera.render(&scene, &mut fb);
+    camera.render(scene, &mut fb);
 
     // Output the framebuffer colour and depth as two images
     fb.write_rgb_file("test.ppm")
@@ -134,10 +109,10 @@ fn main() {
         .expect("failed to write depth output to PPM file");
 }
 
-fn spawn_sphere(min_pos: Vector, max_pos: Vector, max_rad: f32) -> Sphere {
+fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
     let x = rand::thread_rng().gen_range(min_pos.x..max_pos.x);
     let y = rand::thread_rng().gen_range(min_pos.y..max_pos.y);
     let z = rand::thread_rng().gen_range(min_pos.z..max_pos.z);
-    let center = Vertex::from_xyz(x, y, z);
+    let center = Vertex::new(x, y, z);
     Sphere::new(center, rand::thread_rng().gen_range(0.2..max_rad))
 }

@@ -19,7 +19,8 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
-use crate::{colour::Colour, vector::Vector, vertex::Vertex};
+use crate::{colour::Colour, Vertex};
+use glam::Vec3A;
 
 use super::Light;
 
@@ -27,7 +28,7 @@ use super::Light;
 /// The light has no position and can be treated as infinitely far away.
 #[derive(Clone, Debug, PartialEq)]
 pub struct DirectionalLight {
-    pub direction: Vector,
+    pub direction: Vec3A,
     pub intensity: Colour,
 }
 
@@ -35,7 +36,7 @@ impl Default for DirectionalLight {
     /// This is the equivalent of the default (no-argument) constructor from the C++ version.
     fn default() -> Self {
         Self {
-            direction: Vector::default(),
+            direction: Vec3A::default(),
             intensity: Colour::default(),
         }
     }
@@ -43,16 +44,16 @@ impl Default for DirectionalLight {
 
 impl DirectionalLight {
     /// This is the equivalent of the two-argument constructor from the C++ version.
-    pub fn new(direction: Vector, intensity: Colour) -> Self {
+    pub fn new(direction: Vec3A, intensity: Colour) -> Self {
         Self {
-            direction: direction.normalised(),
+            direction: direction.normalize(),
             intensity,
         }
     }
 }
 
 impl Light for DirectionalLight {
-    fn get_direction(&self, _surface: Vertex) -> (Vector, bool) {
+    fn get_direction(&self, _surface: Vertex) -> (Vec3A, bool) {
         (-self.direction, true)
     }
 

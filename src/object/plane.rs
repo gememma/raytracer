@@ -1,37 +1,12 @@
-//! [`Plane`], an [`Object`] that is an infinite plane that has volume.
-//!
-//! ---
-//!
-//! krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
-//!
-//! I've put a lot of time and effort into this code. For the last decade it's been used to
-//! introduce hundreds of students at multiple universities to raytracing. It forms the basis of
-//! your coursework but you are free to continue using/developing forever more. However, I ask that
-//! you don't share the code or your derivitive versions publicly. In order to continue
-//! to be used for coursework and in particular assessment it's important that versions containing
-//! solutions are not searchable on the web or easy to download.
-//!
-//! If you want to show off your programming ability, instead of releasing the code, consider
-//! generating an incredible image and explaining how you produced it.
-//!
-//! ---
-//!
-//! Rust reimplementation provided by a former student. This version is made available under the
-//! same copyright and conditions as the original C++ implementation.
-
+use super::Object;
 use crate::{
     hit::Hit,
     material::{falsecolour::FalseColour, Material},
     ray::Ray,
-    transform::{Apply, Transform},
-    vector::Vector,
-    vertex::Vertex,
+    Vertex,
 };
+use glam::{Affine3A, Vec3A};
 
-use super::Object;
-
-/// `Plane` is an infinite plane that has volume. It returns +/- big number on the inside of the
-/// ray.
 #[derive(Debug)]
 pub struct Plane {
     pub a: f32,
@@ -74,16 +49,16 @@ impl Object for Plane {
                 let hit1 = Hit {
                     t: -10000000000., // infinity
                     entering: true,
-                    what: self,
+                    object_hit: self,
                     position: Vertex::default(),
-                    normal: Vector::default(),
+                    normal: Vec3A::default(),
                 };
                 let hit2 = Hit {
                     t: 10000000000., // infinity
                     entering: false,
-                    what: self,
+                    object_hit: self,
                     position: Vertex::default(),
-                    normal: Vector::default(),
+                    normal: Vec3A::default(),
                 };
                 return vec![hit1, hit2];
             } else {
@@ -97,19 +72,19 @@ impl Object for Plane {
             let hit1 = Hit {
                 t: -10000000000., // infinity
                 entering: true,
-                what: self,
+                object_hit: self,
                 position: Vertex::default(),
-                normal: Vector::default(),
+                normal: Vec3A::default(),
             };
             let mut hit2 = Hit {
                 t, // infinity (this is the C++ comment, but I'm pretty sure this is not infinity)
                 entering: false,
-                what: self,
+                object_hit: self,
                 position: ray.position + t * ray.direction,
-                normal: Vector::new(self.a, self.b, self.c),
+                normal: Vec3A::new(self.a, self.b, self.c),
             };
             if hit2.normal.dot(ray.direction) > 0. {
-                hit2.normal.negate();
+                hit2.normal *= -1.;
             }
             return vec![hit1, hit2];
         } else {
@@ -117,33 +92,25 @@ impl Object for Plane {
             let mut hit1 = Hit {
                 t, // infinity (this is the C++ comment, but I'm pretty sure this is not infinity)
                 entering: true,
-                what: self,
+                object_hit: self,
                 position: ray.position + t * ray.direction,
-                normal: Vector::new(self.a, self.b, self.c),
+                normal: Vec3A::new(self.a, self.b, self.c),
             };
             if hit1.normal.dot(ray.direction) > 0. {
-                hit1.normal.negate();
+                hit1.normal *= -1.;
             }
             let hit2 = Hit {
                 t: 10000000000., // infinity
                 entering: false,
-                what: self,
+                object_hit: self,
                 position: Vertex::default(),
-                normal: Vector::default(),
+                normal: Vec3A::default(),
             };
             return vec![hit1, hit2];
         }
     }
 
-    fn apply_transform(&mut self, transform: &Transform) {
-        let ti = transform.inverse().transpose();
-        let mut v = Vertex::from_xyzw(self.a, self.b, self.c, self.d);
-
-        ti.apply_to(&mut v);
-
-        self.a = v.x;
-        self.b = v.y;
-        self.c = v.z;
-        self.d = v.w;
+    fn apply_transform(&mut self, _transform: Affine3A) {
+        todo!()
     }
 }

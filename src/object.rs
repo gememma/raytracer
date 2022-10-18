@@ -20,8 +20,9 @@
 //! Rust reimplementation provided by a former student. This version is made available under the
 //! same copyright and conditions as the original C++ implementation.
 
-use crate::{hit::Hit, material::Material, ray::Ray, transform::Transform};
+use crate::{hit::Hit, material::Material, ray::Ray};
 
+use glam::Affine3A;
 use std::fmt::Debug;
 
 pub mod plane;
@@ -48,5 +49,5 @@ pub trait Object: Debug {
     fn intersection(&self, ray: &Ray) -> Vec<Hit>;
 
     /// Apply a transform to this object.
-    fn apply_transform(&mut self, transform: &Transform);
+    fn apply_transform(&mut self, t: Affine3A);
 }

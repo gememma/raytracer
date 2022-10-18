@@ -1,35 +1,12 @@
-//! [`PolyMesh`], an [`Object`] that reads and intersects with triangle meshes.
-//!
-//! ---
-//!
-//! krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
-//!
-//! I've put a lot of time and effort into this code. For the last decade it's been used to
-//! introduce hundreds of students at multiple universities to raytracing. It forms the basis of
-//! your coursework but you are free to continue using/developing forever more. However, I ask that
-//! you don't share the code or your derivitive versions publicly. In order to continue
-//! to be used for coursework and in particular assessment it's important that versions containing
-//! solutions are not searchable on the web or easy to download.
-//!
-//! If you want to show off your programming ability, instead of releasing the code, consider
-//! generating an incredible image and explaining how you produced it.
-//!
-//! ---
-//!
-//! Rust reimplementation provided by a former student. This version is made available under the
-//! same copyright and conditions as the original C++ implementation.
-
-use crate::transform::Apply;
+use super::Object;
 use crate::{
     hit::Hit,
     material::{falsecolour::FalseColour, Material},
     ray::Ray,
-    transform::Transform,
-    vertex::Vertex,
+    Vertex,
 };
+use glam::Affine3A;
 use std::fs;
-
-use super::Object;
 
 type TriangleIndex = [usize; 3];
 
@@ -73,9 +50,9 @@ impl PolyMesh {
             let l = lines
                 .next()
                 .expect(format!("Valid line, ln {}", ln).as_str());
-            let mut raw_coords = l.split_whitespace();
+            let raw_coords = l.split_whitespace();
             let list = raw_coords.collect::<Vec<_>>();
-            let v = Vertex::from_xyz(
+            let v = Vertex::new(
                 list[0].parse::<f32>().unwrap(),
                 list[1].parse::<f32>().unwrap(),
                 list[2].parse::<f32>().unwrap(),
@@ -88,7 +65,7 @@ impl PolyMesh {
             let l = lines
                 .next()
                 .expect(format!("Valid line, ln {}", ln).as_str());
-            let mut raw_verts = l.split_whitespace();
+            let raw_verts = l.split_whitespace();
             let list = raw_verts.collect::<Vec<_>>();
             let v = [
                 list[1].parse::<usize>().unwrap(),
@@ -159,9 +136,9 @@ impl Object for PolyMesh {
                 let h = Hit {
                     t,
                     entering,
-                    what: self,
+                    object_hit: self,
                     position: ray.position + ray.direction * t,
-                    normal: -plane_normal.normalised(),
+                    normal: -plane_normal.normalize(),
                 };
                 hits.push(h);
             }
@@ -169,9 +146,11 @@ impl Object for PolyMesh {
         hits
     }
 
-    fn apply_transform(&mut self, t: &Transform) {
-        for v in &mut self.vertices {
-            t.apply_to(v);
+    fn apply_transform(&mut self, t: Affine3A) {
+        let mut vertices = Vec::new();
+        for v in &self.vertices {
+            vertices.push(t.transform_point3a(*v));
         }
+        self.vertices = vertices;
     }
 }

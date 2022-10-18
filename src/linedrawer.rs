@@ -21,7 +21,7 @@ fn draw_x_line(f: &mut FrameBuffer, mut sx: i32, mut sy: i32, mut ex: i32, mut e
     let mut x = sx;
 
     let dy = (ey - sy) * dir;
-    let dx = (ex - sx);
+    let dx = ex - sx;
     let mut fy = dy / 2;
 
     while x != ex {
@@ -46,7 +46,7 @@ fn draw_y_line(f: &mut FrameBuffer, mut sx: i32, mut sy: i32, mut ex: i32, mut e
     let mut y = sy;
     let mut x = sx;
 
-    let dy = (ey - sy);
+    let dy = ey - sy;
     let dx = (ex - sx) * dir;
     let mut fx = dx / 2;
 

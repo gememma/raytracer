@@ -1,33 +1,6 @@
-//! [`Scene`], a struct that is used to build a scene database of [`Object`]s and [`Light`]s and
-//! then trace a [`Ray`] through it.
-//!
-//! ---
-//!
-//! krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
-//!
-//! I've put a lot of time and effort into this code. For the last decade it's been used to
-//! introduce hundreds of students at multiple universities to raytracing. It forms the basis of
-//! your coursework but you are free to continue using/developing forever more. However, I ask that
-//! you don't share the code or your derivitive versions publicly. In order to continue
-//! to be used for coursework and in particular assessment it's important that versions containing
-//! solutions are not searchable on the web or easy to download.
-//!
-//! If you want to show off your programming ability, instead of releasing the code, consider
-//! generating an incredible image and explaining how you produced it.
-//!
-//! ---
-//!
-//! Rust reimplementation provided by a former student. This version is made available under the
-//! same copyright and conditions as the original C++ implementation.
+use crate::Vertex;
+use crate::{colour::Colour, hit::Hit, light::Light, object::Object, ray::Ray};
 
-use crate::vector::Vector;
-use crate::vertex::Vertex;
-use crate::{
-    colour::Colour, environment::Environment, hit::Hit, light::Light, object::Object, ray::Ray,
-};
-
-/// `Scene` is a struct that is used to build a scene database of [`Object`]s and [`Light`]s and
-/// then trace a [`Ray`] through it.
 #[derive(Debug)]
 pub struct Scene {
     pub object_list: Vec<Box<dyn Object>>,
@@ -35,7 +8,6 @@ pub struct Scene {
 }
 
 impl Default for Scene {
-    /// This is the equivalent of the default (no-argument) constructor from the C++ version.
     fn default() -> Self {
         Self {
             object_list: Vec::default(),
@@ -45,8 +17,6 @@ impl Default for Scene {
 }
 
 impl Scene {
-    /// Trace a [`Ray`] through the scene and find the closest if any object intersection in front
-    /// of the ray.
     pub fn trace(&self, ray: &Ray) -> Option<Hit> {
         let mut best_hit = None;
 
@@ -67,15 +37,8 @@ impl Scene {
         best_hit
     }
 
-    /// Filter the list of returned hits to the closest +ve.
     pub fn select_first(hits: Vec<Hit>) -> Option<Hit> {
         let mut result: Option<Hit> = None;
-        // for hit in hits {
-        //     if hit.t >= 0. {
-        //         result = Some(hit);
-        //         break;
-        //     }
-        // }
         for hit in hits {
             if let Some(h) = &result {
                 if hit.t < h.t && hit.t >= 0. {
@@ -89,9 +52,8 @@ impl Scene {
     }
 }
 
-impl Environment for Scene {
-    /// Raytrace a shadow ray.
-    fn shadowtrace(&self, ray: &Ray, limit: f32) -> bool {
+impl Scene {
+    pub fn shadowtrace(&self, ray: &Ray, limit: f32) -> bool {
         for object in &self.object_list {
             if let Some(hit) = Self::select_first(object.intersection(ray)) {
                 if hit.t > 0.0000001 && hit.t < limit {
@@ -102,9 +64,7 @@ impl Environment for Scene {
         return false;
     }
 
-    /// Trace a [`Ray`] through the scene and return its [`Colour`]. This function is the one that
-    /// should recurse down the reflection/refraction tree within a material.
-    fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
+    pub fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
         // a default colour if we hit nothing.
         let mut colour = Colour::from_rgba(0., 0., 0., 0.);
         let mut depth = 0.;
@@ -114,13 +74,15 @@ impl Environment for Scene {
 
         // if we found a primitive then compute the colour we should see
         if let Some(best) = best_hit {
+            let viewer = (viewer - best.position).normalize();
             depth = best.t;
-            colour += best.what.material().compute_once(&ray, &best, recurse);
+            colour += best
+                .object_hit
+                .material()
+                .compute_once(viewer, &best, recurse);
 
             // next, compute the light contribution for each light in the scene.
             for light in &self.light_list {
-                let viewer = (viewer - best.position).normalised();
-
                 // ldir is direction towards the light
                 let (ldir, mut lit) = light.get_direction(best.position);
 
@@ -138,8 +100,11 @@ impl Environment for Scene {
 
                 if lit {
                     let intensity = light.get_intensity(best.position);
-                    colour +=
-                        intensity * best.what.material().compute_per_light(viewer, &best, ldir);
+                    colour += intensity
+                        * best
+                            .object_hit
+                            .material()
+                            .compute_per_light(viewer, &best, ldir);
                 }
             }
         } else {
@@ -152,9 +117,7 @@ impl Environment for Scene {
 
         (colour, depth)
     }
-}
 
-impl Scene {
     pub fn add_object<O: Object + 'static>(&mut self, object: O) {
         self.object_list.push(Box::new(object));
     }
