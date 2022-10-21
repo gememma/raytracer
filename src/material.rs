@@ -1,9 +1,8 @@
 use crate::{colour::Colour, hit::Hit};
-
 use glam::Vec3A;
 use std::fmt::Debug;
 
-pub mod falsecolour;
+pub mod normalshading;
 pub mod phong;
 
 pub trait Material: Debug {

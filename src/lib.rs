@@ -11,4 +11,5 @@ pub mod object;
 pub mod ray;
 pub mod scene;
 
+// type alias for Vertex
 pub type Vertex = Vec3A;

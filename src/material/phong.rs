@@ -22,14 +22,8 @@ impl Phong {
     }
 }
 
-impl Default for Phong {
-    fn default() -> Self {
-        todo!("you must implement the default constructor for Phong")
-    }
-}
-
 impl Material for Phong {
-    // ambient term.
+    // ambient term
     fn compute_once(&self, _viewer: Vec3A, _hit: &Hit, _recurse: usize) -> Colour {
         let ambient_intensity = 0.3;
         self.ambient * ambient_intensity
@@ -43,7 +37,7 @@ impl Material for Phong {
         } else {
             self.diffuse * dotprod
         };
-        // let r = hit.normal.reflection(-ldir);
+
         let d = hit.normal.dot(-ldir) * 2.;
         let r = Vec3A::new(
             -ldir.x - d * hit.normal.x,

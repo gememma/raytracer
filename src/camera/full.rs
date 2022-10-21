@@ -16,13 +16,6 @@ pub struct FullCamera {
     bottom_left_pixel: Vec3A,
 }
 
-impl Default for FullCamera {
-    /// This is the equivalent of the default (no-argument) constructor from the C++ version.
-    fn default() -> Self {
-        todo!("you must implement the default constructor for FullCamera")
-    }
-}
-
 impl FullCamera {
     pub fn new(
         fov: f32,

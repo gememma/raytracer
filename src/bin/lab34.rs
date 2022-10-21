@@ -1,12 +1,11 @@
 use glam::{Affine3A, Vec3A};
 use rand::Rng;
 use raytracer::camera::full::FullCamera;
-use raytracer::object::plane::Plane;
 use raytracer::{
-    camera::{simple::SimpleCamera, Camera},
+    camera::Camera,
     colour::Colour,
     framebuffer::FrameBuffer,
-    light::directional::DirectionalLight,
+    light::directional::Directional,
     material::phong::Phong,
     object::{polymesh::PolyMesh, sphere::Sphere, Object},
     scene::Scene,
@@ -33,13 +32,8 @@ fn build_scene(scene: &mut Scene) {
     let mut ground = Sphere::new(Vertex::new(0., -103.5, -1.), 100.);
 
     // Create lighting
-    let dl = DirectionalLight::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
+    let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
     scene.add_light(dl);
-    // let dl2 = DirectionalLight::new(
-    //     Vector::new(-0.3, -1., 0.75),
-    //     Colour::from_rgba(1., 0.6, 1., 0.),
-    // );
-    // scene.add_light(dl2);
 
     // Create materials manually
     let bp1 = Phong::new(
@@ -70,12 +64,10 @@ fn build_scene(scene: &mut Scene) {
             Colour::from_rgb(0.5, 0.5, 0.5),
             40.,
         )));
-        // println!("{sphere:?}");
         scene.add_object(sphere);
     }
 }
 
-// This is the entry point function to the program.
 fn main() {
     let width = 512;
     let height = 512;
@@ -89,7 +81,6 @@ fn main() {
     build_scene(&mut scene);
 
     // Declare a camera
-    // let camera = SimpleCamera::with_fov(0.5);
     let camera = FullCamera::new(
         1.,
         Vertex::new(0., 3., -4.),
@@ -110,6 +101,7 @@ fn main() {
 }
 
 fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
+    // generate a randomly sized and positioned sphere
     let x = rand::thread_rng().gen_range(min_pos.x..max_pos.x);
     let y = rand::thread_rng().gen_range(min_pos.y..max_pos.y);
     let z = rand::thread_rng().gen_range(min_pos.z..max_pos.z);

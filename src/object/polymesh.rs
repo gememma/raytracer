@@ -1,7 +1,7 @@
 use super::Object;
 use crate::{
     hit::Hit,
-    material::{falsecolour::FalseColour, Material},
+    material::{normalshading::NormalShading, Material},
     ray::Ray,
     Vertex,
 };
@@ -10,7 +10,6 @@ use std::fs;
 
 type TriangleIndex = [usize; 3];
 
-/// `PolyMesh` reads and intersects with triangle meshes.
 #[derive(Debug)]
 pub struct PolyMesh {
     pub vertex_count: usize,
@@ -23,7 +22,6 @@ pub struct PolyMesh {
 }
 
 impl PolyMesh {
-    /// This is the equivalent of the two-argument constructor from the C++ version.
     pub fn new(filename: &str, smoothing: bool, one_ind: bool) -> Self {
         let contents = fs::read_to_string(filename).expect("Should read the file");
         let mut lines = contents.lines();
@@ -81,7 +79,7 @@ impl PolyMesh {
             triangle_indices,
             smoothing,
             one_ind,
-            material: Box::new(FalseColour::default()),
+            material: Box::new(NormalShading::default()),
         }
     }
 }

@@ -4,6 +4,6 @@ use crate::scene::Scene;
 pub mod full;
 pub mod simple;
 
-pub trait Camera: Default {
+pub trait Camera {
     fn render(&self, env: Scene, fb: &mut FrameBuffer);
 }

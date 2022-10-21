@@ -16,7 +16,6 @@ pub struct FrameBuffer {
 }
 
 impl FrameBuffer {
-    // constructors
     pub fn new(width: usize, height: usize) -> Self {
         FrameBuffer {
             buf: vec![Pixel::default(); width * height],
@@ -25,7 +24,7 @@ impl FrameBuffer {
         }
     }
     pub fn default() -> Self {
-        Self::new(1024, 1024)
+        Self::new(512, 512)
     }
 
     pub fn plot_pixel(&mut self, x: usize, y: usize, red: f32, green: f32, blue: f32) {

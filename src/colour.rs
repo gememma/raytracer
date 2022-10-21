@@ -58,12 +58,12 @@ impl Colour {
 impl Mul<&Colour> for Colour {
     type Output = Self;
 
-    fn mul(self, rhs: &Self) -> Self {
+    fn mul(self, other: &Self) -> Self {
         Self::from_rgba(
-            self.r * rhs.r,
-            self.g * rhs.g,
-            self.b * rhs.b,
-            self.a * rhs.a,
+            self.r * other.r,
+            self.g * other.g,
+            self.b * other.b,
+            self.a * other.a,
         )
     }
 }
@@ -71,12 +71,12 @@ impl Mul<&Colour> for Colour {
 impl Mul<Colour> for Colour {
     type Output = Self;
 
-    fn mul(self, rhs: Self) -> Self {
+    fn mul(self, other: Self) -> Self {
         Self::from_rgba(
-            self.r * rhs.r,
-            self.g * rhs.g,
-            self.b * rhs.b,
-            self.a * rhs.a,
+            self.r * other.r,
+            self.g * other.g,
+            self.b * other.b,
+            self.a * other.a,
         )
     }
 }
@@ -84,12 +84,12 @@ impl Mul<Colour> for Colour {
 impl Add<&Colour> for Colour {
     type Output = Self;
 
-    fn add(self, rhs: &Self) -> Self::Output {
+    fn add(self, other: &Self) -> Self::Output {
         Self::from_rgba(
-            self.r + rhs.r,
-            self.g + rhs.g,
-            self.b + rhs.b,
-            (self.a + rhs.a).clamp(0., 1.),
+            self.r + other.r,
+            self.g + other.g,
+            self.b + other.b,
+            (self.a + other.a).clamp(0., 1.),
         )
     }
 }
@@ -97,12 +97,12 @@ impl Add<&Colour> for Colour {
 impl Add<Colour> for Colour {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
+    fn add(self, other: Self) -> Self::Output {
         Self::from_rgba(
-            self.r + rhs.r,
-            self.g + rhs.g,
-            self.b + rhs.b,
-            self.a + rhs.a,
+            self.r + other.r,
+            self.g + other.g,
+            self.b + other.b,
+            self.a + other.a,
         )
     }
 }
@@ -110,43 +110,43 @@ impl Add<Colour> for Colour {
 impl Mul<f32> for Colour {
     type Output = Self;
 
-    fn mul(self, rhs: f32) -> Self::Output {
-        Self::from_rgba(self.r * rhs, self.g * rhs, self.b * rhs, self.a)
+    fn mul(self, other: f32) -> Self::Output {
+        Self::from_rgba(self.r * other, self.g * other, self.b * other, self.a)
     }
 }
 
 impl AddAssign<&Colour> for Colour {
-    fn add_assign(&mut self, rhs: &Self) {
-        self.r += rhs.r;
-        self.g += rhs.g;
-        self.b += rhs.b;
-        self.a += rhs.a;
+    fn add_assign(&mut self, other: &Self) {
+        self.r += other.r;
+        self.g += other.g;
+        self.b += other.b;
+        self.a += other.a;
     }
 }
 
 impl AddAssign<Colour> for Colour {
-    fn add_assign(&mut self, rhs: Self) {
-        self.r += rhs.r;
-        self.g += rhs.g;
-        self.b += rhs.b;
-        self.a += rhs.a;
+    fn add_assign(&mut self, other: Self) {
+        self.r += other.r;
+        self.g += other.g;
+        self.b += other.b;
+        self.a += other.a;
     }
 }
 
 impl MulAssign<&Colour> for Colour {
-    fn mul_assign(&mut self, rhs: &Self) {
-        self.r *= rhs.r;
-        self.g *= rhs.g;
-        self.b *= rhs.b;
-        self.a *= rhs.a;
+    fn mul_assign(&mut self, other: &Self) {
+        self.r *= other.r;
+        self.g *= other.g;
+        self.b *= other.b;
+        self.a *= other.a;
     }
 }
 
 impl MulAssign<Colour> for Colour {
-    fn mul_assign(&mut self, rhs: Self) {
-        self.r *= rhs.r;
-        self.g *= rhs.g;
-        self.b *= rhs.b;
-        self.a *= rhs.a;
+    fn mul_assign(&mut self, other: Self) {
+        self.r *= other.r;
+        self.g *= other.g;
+        self.b *= other.b;
+        self.a *= other.a;
     }
 }
