@@ -68,10 +68,8 @@ fn build_scene(scene: &mut Scene) {
 }
 
 fn main() {
-    let width = 512;
-    let height = 512;
     // Create a framebuffer
-    let mut fb = FrameBuffer::new(width, height);
+    let mut fb = FrameBuffer::default();
 
     // Create a scene
     let mut scene = Scene::default();
