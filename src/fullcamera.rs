@@ -2,8 +2,6 @@ use crate::scene::Scene;
 use crate::{framebuffer::FrameBuffer, ray::Ray, Vertex};
 use glam::Vec3A;
 
-use super::Camera;
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct FullCamera {
     pub width: usize,
@@ -55,10 +53,7 @@ impl FullCamera {
                 .normalize(),
         )
     }
-}
-
-impl Camera for FullCamera {
-    fn render(&self, env: Scene, fb: &mut FrameBuffer) {
+    pub fn render(&self, env: Scene, fb: &mut FrameBuffer) {
         for y in 0..fb.height() {
             for x in 0..fb.width() {
                 let ray = self.get_ray_pixel(x, y);

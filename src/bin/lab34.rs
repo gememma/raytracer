@@ -1,8 +1,7 @@
 use glam::{Affine3A, Vec3A};
 use rand::Rng;
-use raytracer::camera::full::FullCamera;
+use raytracer::fullcamera::FullCamera;
 use raytracer::{
-    camera::Camera,
     colour::Colour,
     framebuffer::FrameBuffer,
     light::directional::Directional,

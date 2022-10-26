@@ -1,8 +1,8 @@
 use glam::Vec3A;
 
-pub mod camera;
 pub mod colour;
 pub mod framebuffer;
+pub mod fullcamera;
 pub mod hit;
 pub mod light;
 pub mod linedrawer;
