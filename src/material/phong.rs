@@ -38,6 +38,7 @@ impl Material for Phong {
             self.diffuse * dotprod
         };
 
+        // TODO: move into reflection function
         let d = hit.normal.dot(-ldir) * 2.;
         let r = Vec3A::new(
             -ldir.x - d * hit.normal.x,
