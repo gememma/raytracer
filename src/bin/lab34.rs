@@ -83,8 +83,8 @@ fn main() {
         Vertex::new(0., 3., -4.),
         Vertex::new(0., 0.5, 1.),
         Vec3A::new(0., 1., 0.),
-        width,
-        height,
+        fb.width(),
+        fb.height(),
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.

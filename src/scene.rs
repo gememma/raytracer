@@ -3,8 +3,8 @@ use crate::{colour::Colour, hit::Hit, light::Light, object::Object, ray::Ray};
 
 #[derive(Debug)]
 pub struct Scene {
-    pub object_list: Vec<Box<dyn Object>>,
-    pub light_list: Vec<Box<dyn Light>>,
+    pub object_list: Vec<Box<dyn Object + Send + Sync>>,
+    pub light_list: Vec<Box<dyn Light + Send + Sync>>,
 }
 
 impl Default for Scene {
@@ -118,11 +118,11 @@ impl Scene {
         (colour, depth)
     }
 
-    pub fn add_object<O: Object + 'static>(&mut self, object: O) {
+    pub fn add_object<O: Object + Send + Sync + 'static>(&mut self, object: O) {
         self.object_list.push(Box::new(object));
     }
 
-    pub fn add_light<L: Light + 'static>(&mut self, light: L) {
+    pub fn add_light<L: Light + Send + Sync + 'static>(&mut self, light: L) {
         self.light_list.push(Box::new(light));
     }
 }
