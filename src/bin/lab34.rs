@@ -23,7 +23,7 @@ fn build_scene(scene: &mut Scene) {
     let t2 = Affine3A::from_rotation_x(PI / 2.);
 
     // Read in the bigger teapot model
-    let mut pm = PolyMesh::new("teapot.ply", false, true);
+    let mut pm = PolyMesh::new("teapot.ply", true, true);
     pm.apply_transform(t2);
     pm.apply_transform(transform);
 
@@ -69,6 +69,7 @@ fn build_scene(scene: &mut Scene) {
 
 fn main() {
     // Create a framebuffer
+    // let mut fb = FrameBuffer::new(2048, 2048);
     let mut fb = FrameBuffer::default();
 
     // Create a scene
@@ -80,7 +81,7 @@ fn main() {
     // Declare a camera
     let camera = FullCamera::new(
         1.,
-        Vertex::new(0., 3., -4.),
+        Vertex::new(0., 1., -4.),
         Vertex::new(0., 0.5, 1.),
         Vec3A::new(0., 1., 0.),
         fb.width(),

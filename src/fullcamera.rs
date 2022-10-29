@@ -56,6 +56,7 @@ impl FullCamera {
         )
     }
     pub fn render(&self, env: Scene, fb: &mut FrameBuffer) {
+        // This method spawns threads that raytrace in parallel for speed
         thread::scope(|s| {
             let (tx, rx) = channel();
             let thread_num = 8;
