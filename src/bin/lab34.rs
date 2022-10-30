@@ -93,10 +93,10 @@ fn main() {
     camera.render(scene, &mut fb);
 
     // Output the framebuffer colour and depth as two images
-    fb.write_rgb_file("test.ppm")
-        .expect("failed to write RGB output to PPM file");
-    fb.write_depth_file("depth.ppm")
-        .expect("failed to write depth output to PPM file");
+    fb.write_rgb_png("test.png")
+        .expect("failed to write RGB output to PNG file");
+    fb.write_depth_png("depth.png")
+        .expect("failed to write depth output to PNG file");
 }
 
 fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {

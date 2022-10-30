@@ -1,7 +1,8 @@
 use crate::colour::Colour;
+use png::{BitDepth, ColorType, Encoder, ScaledFloat, SourceChromaticities};
 use std::fs::File;
 use std::io;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Pixel {
@@ -45,7 +46,61 @@ impl FrameBuffer {
     pub fn get_depth(&self, x: usize, y: usize) -> f32 {
         self.buf[y * self.width + x].depth
     }
-    pub fn write_rgb_file(&self, filename: &str) -> io::Result<()> {
+
+    pub fn write_rgb_png(&self, filename: &str) -> io::Result<()> {
+        // Open file
+        let file = File::create(filename)?;
+        let ref mut w = BufWriter::new(file);
+
+        let mut encoder = Encoder::new(w, self.width as u32, self.height as u32);
+        encoder.set_color(ColorType::Rgba);
+        encoder.set_depth(BitDepth::Eight);
+        encoder.set_source_gamma(ScaledFloat::new(1. / 2.));
+        let mut writer = encoder.write_header().unwrap();
+
+        let mut output = vec![];
+        for p in &self.buf {
+            output.push((255. * p.colour.r) as u8);
+            output.push((255. * p.colour.g) as u8);
+            output.push((255. * p.colour.b) as u8);
+            output.push((255. * p.colour.a) as u8);
+        }
+        writer.write_image_data(&output).unwrap();
+        Ok(())
+    }
+    pub fn write_depth_png(&self, filename: &str) -> io::Result<()> {
+        // Open file
+        let file = File::create(filename)?;
+        let ref mut w = BufWriter::new(file);
+
+        let mut encoder = Encoder::new(w, self.width as u32, self.height as u32);
+        encoder.set_color(ColorType::Rgba);
+        encoder.set_depth(BitDepth::Eight);
+        encoder.set_source_gamma(ScaledFloat::new(1. / 2.));
+        let mut writer = encoder.write_header().unwrap();
+
+        let mut min: f32 = 0.;
+        let mut max: f32 = 0.;
+
+        // Calculate colour attenuation
+        for p in &self.buf {
+            min = min.min(p.depth);
+            max = max.max(p.depth);
+        }
+        let diff = if max == min { 1. } else { max - min };
+
+        let mut output = vec![];
+        for p in &self.buf {
+            for _ in 0..3 {
+                output.push((255. * (p.depth - min) / diff) as u8);
+            }
+            output.push(255);
+        }
+        writer.write_image_data(&output).unwrap();
+        Ok(())
+    }
+
+    pub fn write_rgb_ppm(&self, filename: &str) -> io::Result<()> {
         let mut min: f32 = 0.;
         let mut max: f32 = 0.;
 
@@ -72,7 +127,7 @@ impl FrameBuffer {
         }
         file.write_all(&output)
     }
-    pub fn write_depth_file(&self, filename: &str) -> io::Result<()> {
+    pub fn write_depth_ppm(&self, filename: &str) -> io::Result<()> {
         // Open file
         let mut file = File::create(filename)?;
         let mut min: f32 = 0.;

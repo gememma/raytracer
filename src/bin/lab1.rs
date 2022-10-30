@@ -22,6 +22,6 @@ fn main() {
     }
 
     // output framebuffer
-    f.write_rgb_file("test.ppm")
-        .expect("Writing RGB file failed");
+    fb.write_rgb_png("test.png")
+        .expect("failed to write RGB output to PNG file");
 }

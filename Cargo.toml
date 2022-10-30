@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 glam = "0.21.3"
 indicatif = "0.17.1"
+png = "0.17.6"
 rand = "0.8.5"
