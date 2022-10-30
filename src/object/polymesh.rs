@@ -174,7 +174,7 @@ impl Object for PolyMesh {
                 let plane_normal = if self.smoothing {
                     c0.normal * w + c1.normal * u + c2.normal * v
                 } else {
-                    -e1.cross(e2).normalize()
+                    -e1.cross(e2)
                 };
                 let entering = plane_normal.dot(ray.direction) < 0.;
                 let h = Hit {
@@ -182,7 +182,7 @@ impl Object for PolyMesh {
                     entering,
                     object_hit: self,
                     position: ray.position + ray.direction * t,
-                    normal: plane_normal,
+                    normal: plane_normal.normalize(),
                 };
                 hits.push(h);
             }

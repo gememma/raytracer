@@ -23,8 +23,9 @@ fn build_scene(scene: &mut Scene) {
     let t2 = Affine3A::from_rotation_x(PI / 2.);
 
     // Read in the bigger teapot model
-    let mut pm = PolyMesh::new("teapot.ply", true, true);
-    pm.apply_transform(t2);
+    // let mut pm = PolyMesh::new("teapot.ply", true, true);
+    let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
+    // pm.apply_transform(t2);
     pm.apply_transform(transform);
 
     // let mut sphere = Sphere::new(Vertex::new(0., 1.3, 1.), 0.8);
@@ -38,7 +39,7 @@ fn build_scene(scene: &mut Scene) {
     let bp1 = Phong::new(
         Colour::from_rgb(0.2, 0., 0.),
         Colour::from_rgb(0.4, 0., 0.),
-        Colour::from_rgb(0.4, 0.4, 0.4),
+        Colour::from_rgb(0.5, 0.5, 0.5),
         40.,
     );
     pm.set_material(Box::new(bp1));
