@@ -1,5 +1,5 @@
 use crate::colour::Colour;
-use png::{BitDepth, ColorType, Encoder, ScaledFloat, SourceChromaticities};
+use png::{BitDepth, ColorType, Encoder, ScaledFloat};
 use std::fs::File;
 use std::io;
 use std::io::{BufWriter, Write};
