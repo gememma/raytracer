@@ -1,6 +1,8 @@
-use crate::{colour::Colour, Vertex};
-use glam::Vec3A;
 use std::fmt::Debug;
+
+use glam::Vec3A;
+
+use crate::{colour::Colour, Vertex};
 
 pub mod directional;
 

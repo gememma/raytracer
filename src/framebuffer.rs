@@ -1,8 +1,12 @@
-use crate::colour::Colour;
+use std::{
+    fs::File,
+    io,
+    io::{BufWriter, Write},
+};
+
 use png::{BitDepth, ColorType, Encoder, ScaledFloat};
-use std::fs::File;
-use std::io;
-use std::io::{BufWriter, Write};
+
+use crate::colour::Colour;
 
 #[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Pixel {

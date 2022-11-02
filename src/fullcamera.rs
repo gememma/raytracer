@@ -1,8 +1,8 @@
-use crate::scene::Scene;
-use crate::{framebuffer::FrameBuffer, ray::Ray, Vertex};
+use std::{sync::mpsc::channel, thread};
+
 use glam::Vec3A;
-use std::sync::mpsc::channel;
-use std::thread;
+
+use crate::{framebuffer::FrameBuffer, ray::Ray, scene::Scene, Vertex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FullCamera {

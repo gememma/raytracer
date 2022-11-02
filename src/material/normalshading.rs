@@ -1,7 +1,7 @@
-use crate::{colour::Colour, hit::Hit};
 use glam::Vec3A;
 
 use super::Material;
+use crate::{colour::Colour, hit::Hit};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct NormalShading;

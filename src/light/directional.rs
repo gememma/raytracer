@@ -1,7 +1,7 @@
-use crate::{colour::Colour, Vertex};
 use glam::Vec3A;
 
 use super::Light;
+use crate::{colour::Colour, Vertex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Directional {

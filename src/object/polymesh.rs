@@ -1,3 +1,7 @@
+use std::fs;
+
+use glam::{Affine3A, Vec3A};
+
 use super::Object;
 use crate::{
     hit::Hit,
@@ -5,8 +9,6 @@ use crate::{
     ray::Ray,
     Vertex,
 };
-use glam::{Affine3A, Vec3A};
-use std::fs;
 
 #[derive(Debug)]
 pub struct Triangle {

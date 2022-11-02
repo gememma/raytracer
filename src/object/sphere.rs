@@ -1,12 +1,12 @@
+use glam::{Affine3A, Vec3A};
+
+use super::Object;
 use crate::{
     hit::Hit,
     material::{normalshading::NormalShading, Material},
     ray::Ray,
     Vertex,
 };
-use glam::{Affine3A, Vec3A};
-
-use super::Object;
 
 #[derive(Debug)]
 pub struct Sphere {

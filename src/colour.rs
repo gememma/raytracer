@@ -1,5 +1,6 @@
-use rand::Rng;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+
+use rand::Rng;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Colour {

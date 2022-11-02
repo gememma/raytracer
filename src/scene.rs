@@ -1,5 +1,4 @@
-use crate::Vertex;
-use crate::{colour::Colour, hit::Hit, light::Light, object::Object, ray::Ray};
+use crate::{colour::Colour, hit::Hit, light::Light, object::Object, ray::Ray, Vertex};
 
 #[derive(Debug)]
 pub struct Scene {

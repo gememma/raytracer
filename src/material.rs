@@ -1,6 +1,8 @@
-use crate::{colour::Colour, hit::Hit};
-use glam::Vec3A;
 use std::fmt::Debug;
+
+use glam::Vec3A;
+
+use crate::{colour::Colour, hit::Hit};
 
 pub mod normalshading;
 pub mod phong;

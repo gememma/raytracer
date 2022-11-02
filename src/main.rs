@@ -1,16 +1,17 @@
+use std::f32::consts::PI;
+
 use glam::{Affine3A, Vec3A};
 use rand::Rng;
-use raytracer::fullcamera::FullCamera;
 use raytracer::{
     colour::Colour,
     framebuffer::FrameBuffer,
+    fullcamera::FullCamera,
     light::directional::Directional,
     material::phong::Phong,
-    object::{polymesh::PolyMesh, sphere::Sphere, Object},
+    object::{plane::Plane, polymesh::PolyMesh, sphere::Sphere, Object},
     scene::Scene,
     Vertex,
 };
-use std::f32::consts::PI;
 
 fn build_scene(scene: &mut Scene) {
     // Create objects
@@ -22,13 +23,11 @@ fn build_scene(scene: &mut Scene) {
     );
     let t2 = Affine3A::from_rotation_x(PI / 2.);
 
-    // Read in the bigger teapot model
-    // let mut pm = PolyMesh::new("teapot.ply", true, true);
     let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
-    // pm.apply_transform(t2);
     pm.apply_transform(transform);
 
-    let mut ground = Sphere::new(Vertex::new(0., -103.5, -1.), 100.);
+    // let mut ground = Sphere::new(Vertex::new(0., -103.5, -1.), 100.);
+    let mut ground = Plane::new(Vec3A::new(0., 1., 0.), Vertex::new(0., -3.5, 0.));
 
     // Create lighting
     let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
@@ -45,8 +44,8 @@ fn build_scene(scene: &mut Scene) {
     scene.add_object(pm);
 
     let bp2 = Phong::new(
-        Colour::from_rgb(0., 0.3, 0.1),
-        Colour::from_rgb(0., 0.6, 0.2),
+        Colour::from_rgb(0., 0.15, 0.1),
+        Colour::from_rgb(0., 0.3, 0.15),
         Colour::from_rgb(0.4, 0.4, 0.4),
         40.,
     );
@@ -55,7 +54,7 @@ fn build_scene(scene: &mut Scene) {
 
     // Create 9 random colour/size/position spheres
     for _ in 1..15 {
-        let mut sphere = spawn_sphere(Vec3A::new(-1., 0., 5.), Vec3A::new(1., 2., 7.), 0.6);
+        let mut sphere = spawn_sphere(Vec3A::new(-1., 1., 3.), Vec3A::new(1., 3., 7.), 0.6);
         let c = Colour::random(0.1, 0.7);
         sphere.set_material(Box::new(Phong::new(
             c * 0.6,

@@ -1,8 +1,10 @@
-use crate::{hit::Hit, material::Material, ray::Ray};
-
-use glam::Affine3A;
 use std::fmt::Debug;
 
+use glam::Affine3A;
+
+use crate::{hit::Hit, material::Material, ray::Ray};
+
+pub mod plane;
 pub mod polymesh;
 pub mod sphere;
 

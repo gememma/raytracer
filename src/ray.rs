@@ -1,5 +1,6 @@
-use crate::Vertex;
 use glam::Vec3A;
+
+use crate::Vertex;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ray {

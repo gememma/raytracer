@@ -1,5 +1,6 @@
-use crate::framebuffer::FrameBuffer;
 use std::mem::swap;
+
+use crate::framebuffer::FrameBuffer;
 
 pub fn draw_line(f: &mut FrameBuffer, sx: i32, sy: i32, ex: i32, ey: i32) {
     if (sx == ex) && (sy == ey) {
