@@ -29,7 +29,7 @@ impl FrameBuffer {
         }
     }
     pub fn default() -> Self {
-        Self::new(512, 512)
+        Self::new(1024, 1024)
     }
 
     pub fn plot_pixel(&mut self, x: usize, y: usize, red: f32, green: f32, blue: f32) {

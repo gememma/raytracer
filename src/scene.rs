@@ -78,7 +78,7 @@ impl Scene {
             colour += best
                 .object_hit
                 .material()
-                .compute_once(viewer, &best, recurse);
+                .compute_once(viewer, &best, recurse, self);
 
             // next, compute the light contribution for each light in the scene.
             for light in &self.light_list {
@@ -108,9 +108,9 @@ impl Scene {
             }
         } else {
             // background colour
-            colour.r = 0.;
-            colour.g = 0.;
-            colour.b = 0.;
+            colour.r = 0.2;
+            colour.g = 0.2;
+            colour.b = 0.3;
             colour.a = 1.;
         }
 

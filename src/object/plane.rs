@@ -51,6 +51,7 @@ impl Object for Plane {
             object_hit: self,
             position: ray.position + ray.direction * t,
             normal: self.normal,
+            incident: ray.clone(),
         }]
     }
 

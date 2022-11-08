@@ -25,3 +25,19 @@ impl Ray {
         }
     }
 }
+
+pub trait Reflectable {
+    fn reflect(&self, normal: Vec3A) -> Self;
+}
+
+impl Reflectable for Vec3A {
+    fn reflect(&self, normal: Vec3A) -> Self {
+        // function expects self(incident ray) to point towards surface
+        let d = normal.dot(self.clone()) * 2.;
+        Vec3A::new(
+            self.x - d * normal.x,
+            self.y - d * normal.y,
+            self.z - d * normal.z,
+        )
+    }
+}

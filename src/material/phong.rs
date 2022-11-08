@@ -1,7 +1,7 @@
 use glam::Vec3A;
 
 use super::Material;
-use crate::{colour::Colour, hit::Hit};
+use crate::{colour::Colour, hit::Hit, ray::Reflectable, scene::Scene};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Phong {
@@ -24,7 +24,7 @@ impl Phong {
 
 impl Material for Phong {
     // ambient term
-    fn compute_once(&self, _viewer: Vec3A, _hit: &Hit, _recurse: usize) -> Colour {
+    fn compute_once(&self, _viewer: Vec3A, _hit: &Hit, _recurse: usize, _scene: &Scene) -> Colour {
         let ambient_intensity = 0.3;
         self.ambient * ambient_intensity
     }
@@ -38,13 +38,7 @@ impl Material for Phong {
             self.diffuse * dotprod
         };
 
-        // TODO: move into reflection function
-        let d = hit.normal.dot(-ldir) * 2.;
-        let r = Vec3A::new(
-            -ldir.x - d * hit.normal.x,
-            -ldir.y - d * hit.normal.y,
-            -ldir.z - d * hit.normal.z,
-        );
+        let r = -ldir.reflect(hit.normal);
         let specular = self.specular * (r.dot(-viewer).powf(self.power));
         diffuse + specular
     }

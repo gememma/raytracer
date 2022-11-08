@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use glam::{Affine3A, Vec3A};
 use rand::Rng;
 use raytracer::{
@@ -7,7 +5,7 @@ use raytracer::{
     framebuffer::FrameBuffer,
     fullcamera::FullCamera,
     light::directional::Directional,
-    material::phong::Phong,
+    material::{metallic::Metallic, phong::Phong},
     object::{plane::Plane, polymesh::PolyMesh, sphere::Sphere, Object},
     scene::Scene,
     Vertex,
@@ -21,13 +19,12 @@ fn build_scene(scene: &mut Scene) {
         Vec3A::new(0., 1., 0.),
         Vec3A::new(0., -2.7, 4.),
     );
-    let t2 = Affine3A::from_rotation_x(PI / 2.);
 
     let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
     pm.apply_transform(transform);
 
-    // let mut ground = Sphere::new(Vertex::new(0., -103.5, -1.), 100.);
     let mut ground = Plane::new(Vec3A::new(0., 1., 0.), Vertex::new(0., -3.5, 0.));
+    let mut sphere = Sphere::new(Vertex::new(2.1, 1.2, 4.), 0.8);
 
     // Create lighting
     let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
@@ -51,6 +48,10 @@ fn build_scene(scene: &mut Scene) {
     );
     ground.set_material(Box::new(bp2));
     scene.add_object(ground);
+
+    let met1 = Metallic::new(Colour::from_rgb(0.6, 0.8, 0.8), 40.);
+    sphere.set_material(Box::new(met1));
+    scene.add_object(sphere);
 
     // Create 9 random colour/size/position spheres
     for _ in 1..15 {

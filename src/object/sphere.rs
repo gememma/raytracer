@@ -63,6 +63,7 @@ impl Object for Sphere {
                 object_hit: self,
                 position: position0,
                 normal: (position0 - self.center).normalize(),
+                incident: ray.clone(),
             };
 
             if hit0.normal.dot(ray.direction) > 0. {
@@ -76,6 +77,7 @@ impl Object for Sphere {
                 object_hit: self,
                 position: position1,
                 normal: (position1 - self.center).normalize(),
+                incident: ray.clone(),
             };
 
             if hit1.normal.dot(ray.direction) > 0. {

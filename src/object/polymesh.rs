@@ -185,6 +185,7 @@ impl Object for PolyMesh {
                     object_hit: self,
                     position: ray.position + ray.direction * t,
                     normal: plane_normal.normalize(),
+                    incident: ray.clone(),
                 };
                 hits.push(h);
             }
