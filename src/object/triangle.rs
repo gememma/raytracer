@@ -26,6 +26,19 @@ impl Triangle {
             material: Box::new(NormalShading::default()),
         }
     }
+    pub fn new_with_material(
+        corners @ [v0, v1, v2]: [Vertex; 3],
+        material: Box<dyn Material>,
+    ) -> Self {
+        let e1 = v1 - v0;
+        let e2 = v2 - v0;
+        let normal = e1.cross(e2).normalize();
+        Triangle {
+            normal,
+            corners,
+            material,
+        }
+    }
 }
 
 impl Object for Triangle {
@@ -38,7 +51,7 @@ impl Object for Triangle {
     }
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
-        let epsilon = 0.0000001;
+        let epsilon = 0.0001;
         let [c0, c1, c2] = self.corners.clone();
 
         // implementing the MT algorithm which exploits Cramer's rule
@@ -66,14 +79,18 @@ impl Object for Triangle {
         let t = f * e2.dot(q);
         if t > epsilon {
             // successful ray intersection
-            let plane_normal = -e1.cross(e2);
-            let entering = plane_normal.dot(ray.direction) < 0.;
+            let plane_normal = e1.cross(e2);
+            let normal = if plane_normal.dot(ray.direction) < 0. {
+                plane_normal
+            } else {
+                -plane_normal
+            };
             vec![Hit {
                 t,
-                entering,
+                entering: true,
                 object_hit: self,
                 position: ray.position + ray.direction * t,
-                normal: plane_normal.normalize(),
+                normal: normal.normalize(),
                 incident: ray.clone(),
             }]
         } else {

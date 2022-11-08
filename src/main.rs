@@ -4,9 +4,9 @@ use raytracer::{
     colour::Colour,
     framebuffer::FrameBuffer,
     fullcamera::FullCamera,
-    light::directional::Directional,
+    light::{directional::Directional, point::Point},
     material::{metallic::Metallic, phong::Phong},
-    object::{plane::Plane, polymesh::PolyMesh, sphere::Sphere, Object},
+    object::{plane::Plane, polymesh::PolyMesh, sphere::Sphere, triangle::Triangle, Object},
     scene::Scene,
     Vertex,
 };
@@ -76,13 +76,14 @@ fn main() {
     let mut scene = Scene::default();
 
     // Setup the scene
-    build_scene(&mut scene);
+    // build_scene(&mut scene);
+    build_c_box(&mut scene);
 
     // Declare a camera
     let camera = FullCamera::new(
         1.,
-        Vertex::new(0., 1., -4.),
-        Vertex::new(0., 0.5, 1.),
+        Vertex::new(0., 0., 0.),
+        Vertex::new(0., 0., 8.),
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
@@ -105,4 +106,135 @@ fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
     let z = rand::thread_rng().gen_range(min_pos.z..max_pos.z);
     let center = Vertex::new(x, y, z);
     Sphere::new(center, rand::thread_rng().gen_range(0.2..max_rad))
+}
+
+fn build_c_box(scene: &mut Scene) {
+    // materials
+    let mat_white = Phong::new(
+        Colour::from_rgb(0.1, 0.1, 0.1),
+        Colour::from_rgb(0.6, 0.6, 0.6),
+        Colour::from_rgb(0.4, 0.4, 0.4),
+        40.,
+    );
+    let mat_red = Phong::new(
+        Colour::from_rgb(0.2, 0., 0.),
+        Colour::from_rgb(0.4, 0., 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    let mat_green = Phong::new(
+        Colour::from_rgb(0., 0.2, 0.),
+        Colour::from_rgb(0., 0.4, 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    // floor
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., -3., 4.),
+            Vec3A::new(3., -3., 4.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., -3., 4.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
+    // ceiling
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., 3., 4.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., 3., 4.),
+            Vec3A::new(-3., 3., 4.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
+    // left wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., 3., 4.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_red.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., -3., 4.),
+            Vec3A::new(-3., 3., 4.),
+        ],
+        Box::new(mat_red.clone()),
+    ));
+
+    // right wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., 3., 4.),
+            Vec3A::new(3., -3., 4.),
+        ],
+        Box::new(mat_green.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., -3., 4.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_green.clone()),
+    ));
+
+    // back wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
+    // TODO: REMOVE DEBUG
+    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
+    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
+    spherel.set_material(Box::new(mat_white.clone()));
+    spherem.set_material(Box::new(Metallic::new(
+        Colour::from_rgb(0.6, 0.6, 0.6),
+        40.,
+    )));
+    spherer.set_material(Box::new(mat_white.clone()));
+    scene.add_object(spherel);
+    scene.add_object(spherem);
+    scene.add_object(spherer);
+
+    // lights
+    scene.add_light(Point::new(
+        Vec3A::new(0., 2., 4.),
+        Colour::from_rgba(1., 1., 1., 0.),
+    ));
 }

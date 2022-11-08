@@ -5,6 +5,7 @@ use glam::Vec3A;
 use crate::{colour::Colour, Vertex};
 
 pub mod directional;
+pub mod point;
 
 pub trait Light: Debug {
     // Get direction towards the light from the surface point
