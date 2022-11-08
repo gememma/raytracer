@@ -32,7 +32,7 @@ impl Material for Metallic {
                 .0
     }
 
-    fn compute_per_light(&self, viewer: Vec3A, hit: &Hit, ldir: Vec3A) -> Colour {
+    fn compute_per_light(&self, _viewer: Vec3A, _hit: &Hit, _ldir: Vec3A) -> Colour {
         return Colour::default();
     }
 }

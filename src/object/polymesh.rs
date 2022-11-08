@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct Triangle {
+pub struct MeshTriangle {
     pub normal: Vec3A,
     pub corners: [Corner; 3],
 }
@@ -30,7 +30,7 @@ pub struct IntermediateTriangle {
 
 #[derive(Debug)]
 pub struct PolyMesh {
-    pub triangles: Vec<Triangle>,
+    pub triangles: Vec<MeshTriangle>,
     pub smoothing: bool,
     material: Box<dyn Material>,
 }
@@ -118,7 +118,7 @@ impl PolyMesh {
                     normal,
                 }
             });
-            triangles.push(Triangle {
+            triangles.push(MeshTriangle {
                 normal: t.normal,
                 corners,
             });

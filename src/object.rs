@@ -7,6 +7,7 @@ use crate::{hit::Hit, material::Material, ray::Ray};
 pub mod plane;
 pub mod polymesh;
 pub mod sphere;
+pub mod triangle;
 
 pub trait Object: Debug {
     fn material(&self) -> &dyn Material;
