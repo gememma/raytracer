@@ -64,57 +64,21 @@ impl Scene {
     }
 
     pub fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
-        // a default colour if we hit nothing.
-        let mut colour = Colour::from_rgba(0., 0., 0., 0.);
-        let mut depth = 0.;
-
-        // first step, find the closest primitive
+        // find the closest object
         let best_hit = self.trace(&ray);
 
-        // if we found a primitive then compute the colour we should see
         if let Some(best) = best_hit {
             let viewer = (viewer - best.position).normalize();
-            depth = best.t;
-            colour += best
-                .object_hit
-                .material()
-                .compute_once(viewer, &best, recurse, self);
-
-            // next, compute the light contribution for each light in the scene.
-            for light in &self.light_list {
-                // ldir is direction towards the light
-                let (ldir, mut lit) = light.get_direction(best.position);
-
-                if ldir.dot(best.normal) < 0. {
-                    // Light is facing wrong way.
-                    lit = false;
-                }
-
-                if lit {
-                    lit = !self.shadowtrace(
-                        &Ray::new(best.position + 0.0001 * ldir, ldir),
-                        f32::INFINITY,
-                    );
-                }
-
-                if lit {
-                    let intensity = light.get_intensity(best.position);
-                    colour += intensity
-                        * best
-                            .object_hit
-                            .material()
-                            .compute_per_light(viewer, &best, ldir);
-                }
-            }
+            (
+                best.object_hit
+                    .material()
+                    .compute(viewer, &best, recurse, self),
+                best.t,
+            )
         } else {
             // background colour
-            colour.r = 0.2;
-            colour.g = 0.2;
-            colour.b = 0.3;
-            colour.a = 1.;
+            (Colour::from_rgba(0.2, 0.2, 0.3, 1.), 0.)
         }
-
-        (colour, depth)
     }
 
     pub fn add_object<O: Object + Send + Sync + 'static>(&mut self, object: O) {

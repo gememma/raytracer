@@ -4,12 +4,11 @@ use glam::Vec3A;
 
 use crate::{colour::Colour, hit::Hit, scene::Scene};
 
+pub mod dielectric;
 pub mod metallic;
 pub mod normalshading;
 pub mod phong;
 
 pub trait Material: Debug + Send + Sync {
-    fn compute_once(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour;
-
-    fn compute_per_light(&self, viewer: Vec3A, hit: &Hit, ldir: Vec3A) -> Colour;
+    fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour;
 }

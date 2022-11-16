@@ -1,7 +1,12 @@
 use glam::Vec3A;
 
 use super::Material;
-use crate::{colour::Colour, hit::Hit, ray::Reflectable, scene::Scene};
+use crate::{
+    colour::Colour,
+    hit::Hit,
+    ray::{Ray, Reflectable},
+    scene::Scene,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Phong {
@@ -20,15 +25,6 @@ impl Phong {
             power,
         }
     }
-}
-
-impl Material for Phong {
-    // ambient term
-    fn compute_once(&self, _viewer: Vec3A, _hit: &Hit, _recurse: usize, _scene: &Scene) -> Colour {
-        let ambient_intensity = 0.3;
-        self.ambient * ambient_intensity
-    }
-
     // diffuse and specular terms
     fn compute_per_light(&self, viewer: Vec3A, hit: &Hit, ldir: Vec3A) -> Colour {
         let dotprod = hit.normal.dot(ldir);
@@ -41,5 +37,34 @@ impl Material for Phong {
         let r = -ldir.reflect(hit.normal);
         let specular = self.specular * (r.dot(-viewer).powf(self.power));
         diffuse + specular
+    }
+}
+
+impl Material for Phong {
+    // ambient term
+    fn compute(&self, viewer: Vec3A, hit: &Hit, _recurse: usize, scene: &Scene) -> Colour {
+        let ambient_intensity = 0.3;
+        let mut colour = self.ambient * ambient_intensity;
+
+        for light in &scene.light_list {
+            // ldir is direction towards the light
+            let (ldir, mut lit) = light.get_direction(hit.position);
+
+            if ldir.dot(hit.normal) < 0. {
+                // Light is facing wrong way.
+                lit = false;
+            }
+
+            if lit {
+                lit = !scene
+                    .shadowtrace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
+            }
+
+            if lit {
+                let intensity = light.get_intensity(hit.position);
+                colour += intensity * self.compute_per_light(viewer, &hit, ldir);
+            }
+        }
+        colour
     }
 }
