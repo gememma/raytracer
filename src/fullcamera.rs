@@ -1,8 +1,9 @@
 use std::{sync::mpsc::channel, thread};
 
 use glam::Vec3A;
+use rand::Rng;
 
-use crate::{framebuffer::FrameBuffer, ray::Ray, scene::Scene, Vertex};
+use crate::{colour::Colour, framebuffer::FrameBuffer, ray::Ray, scene::Scene, Vertex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FullCamera {
@@ -14,6 +15,7 @@ pub struct FullCamera {
     pub v: Vec3A,
     pub u: Vec3A,
     bottom_left_pixel: Vec3A,
+    samples: usize,
 }
 
 impl FullCamera {
@@ -24,6 +26,7 @@ impl FullCamera {
         up: Vec3A,
         width: usize,
         height: usize,
+        samples: usize,
     ) -> Self {
         let w = (look - position).normalize();
         let u = (up.cross(w)).normalize();
@@ -42,15 +45,18 @@ impl FullCamera {
             v,
             u,
             bottom_left_pixel,
+            samples,
         }
     }
 
     pub fn get_ray_pixel(&self, x: usize, y: usize) -> Ray {
+        // add a small amount of randomness
+        let mut rng = rand::thread_rng();
         Ray::new(
             self.position,
             (self.bottom_left_pixel
-                + x as f32 / self.width as f32 * self.u
-                + y as f32 / self.height as f32 * self.v
+                + (x as f32 + rng.gen::<f32>()) / self.width as f32 * self.u
+                + (y as f32 + rng.gen::<f32>()) / self.height as f32 * self.v
                 - self.position)
                 .normalize(),
         )
@@ -71,8 +77,14 @@ impl FullCamera {
                 s.spawn(move || {
                     for y in starty..endy {
                         for x in 0..width {
-                            let ray = self.get_ray_pixel(x, y);
-                            let (colour, depth) = env.raytrace(ray, 5, self.position);
+                            let mut colour = Colour::default();
+                            let mut depth = 0.;
+                            for _ in 0..self.samples {
+                                let ray = self.get_ray_pixel(x, y);
+                                let (colourtmp, depthtmp) = env.raytrace(ray, 5, self.position);
+                                colour += colourtmp / self.samples as f32;
+                                depth += depthtmp / self.samples as f32;
+                            }
                             tx.send((colour, depth, x, y)).unwrap();
                         }
                     }

@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign};
 
 use rand::Rng;
 
@@ -149,5 +149,13 @@ impl MulAssign<Colour> for Colour {
         self.g *= other.g;
         self.b *= other.b;
         self.a *= other.a;
+    }
+}
+
+impl Div<f32> for Colour {
+    type Output = Self;
+
+    fn div(self, other: f32) -> Self::Output {
+        Self::from_rgba(self.r / other, self.g / other, self.b / other, self.a)
     }
 }

@@ -31,6 +31,7 @@ fn main() {
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
+        20,
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
