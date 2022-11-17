@@ -73,7 +73,6 @@ impl FullCamera {
                         for x in 0..width {
                             let ray = self.get_ray_pixel(x, y);
                             let (colour, depth) = env.raytrace(ray, 5, self.position);
-
                             tx.send((colour, depth, x, y)).unwrap();
                         }
                     }

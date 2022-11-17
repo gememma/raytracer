@@ -64,6 +64,9 @@ impl Scene {
     }
 
     pub fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
+        if recurse == 0 {
+            return (Colour::from_rgba(0.2, 0.2, 0.3, 1.), 0.);
+        }
         // find the closest object
         let best_hit = self.trace(&ray);
 

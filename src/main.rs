@@ -158,11 +158,11 @@ fn build_c_box(scene: &mut Scene) {
     let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
     let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
-    spherem.set_material(Box::new(Metallic::new(
+    spherem.set_material(Box::new(mat_white.clone()));
+    spherer.set_material(Box::new(Metallic::new(
         Colour::from_rgb(0.6, 0.6, 0.6),
         40.,
     )));
-    spherer.set_material(Box::new(mat_white.clone()));
     scene.add_object(spherel);
     scene.add_object(spherem);
     scene.add_object(spherer);
