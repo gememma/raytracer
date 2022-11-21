@@ -16,6 +16,8 @@ pub struct FullCamera {
     pub u: Vec3A,
     bottom_left_pixel: Vec3A,
     samples: usize,
+    lens_radius: f32,
+    focal_distance: f32,
 }
 
 impl FullCamera {
@@ -27,14 +29,18 @@ impl FullCamera {
         width: usize,
         height: usize,
         samples: usize,
+        aperture: f32,
     ) -> Self {
         let w = (look - position).normalize();
         let u = (up.cross(w)).normalize();
         let v = w.cross(u);
 
+        let focal_distance = (look - position).length();
         let horizontal = 0.5 * u;
         let vertical = 0.5 * v;
-        let bottom_left_pixel = Vec3A::from(position) - horizontal - vertical + fov * w;
+
+        let bottom_left_pixel = position + (-horizontal - vertical + fov * w) * focal_distance;
+        let lens_radius = aperture / 2.; // used to create sample rays, this is ok
 
         Self {
             width,
@@ -46,18 +52,26 @@ impl FullCamera {
             u,
             bottom_left_pixel,
             samples,
+            lens_radius,
+            focal_distance,
         }
     }
 
     pub fn get_ray_pixel(&self, x: usize, y: usize) -> Ray {
+        // convert pixel coordinates to world coordinates
         // add a small amount of randomness
         let mut rng = rand::thread_rng();
+        // offset simulates thin lens model
+        let offset = random_in_unit_disc() * self.lens_radius;
         Ray::new(
-            self.position,
+            self.position + offset,
             (self.bottom_left_pixel
-                + (x as f32 + rng.gen::<f32>()) / self.width as f32 * self.u
-                + (y as f32 + rng.gen::<f32>()) / self.height as f32 * self.v
-                - self.position)
+                + (x as f32 + rng.gen::<f32>()) / self.width as f32 * self.u * self.focal_distance
+                + (y as f32 + rng.gen::<f32>()) / self.height as f32
+                    * self.v
+                    * self.focal_distance
+                - self.position
+                - offset)
                 .normalize(),
         )
     }
@@ -97,5 +111,15 @@ impl FullCamera {
                 }
             });
         });
+    }
+}
+
+pub fn random_in_unit_disc() -> Vec3A {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p = Vec3A::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.);
+        if p.length_squared() < 1. {
+            return p;
+        }
     }
 }

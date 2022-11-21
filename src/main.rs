@@ -27,11 +27,12 @@ fn main() {
     let camera = FullCamera::new(
         1.,
         Vertex::new(0., 0., 0.),
-        Vertex::new(0., 0., 8.),
+        Vertex::new(0., 0., 5.),
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
-        20,
+        100,
+        0.3,
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
@@ -155,9 +156,9 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.5), 0.4);
     let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 4.5), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
     spherem.set_material(Box::new(mat_white.clone()));
     spherer.set_material(Box::new(Metallic::new(

@@ -37,6 +37,7 @@ impl Dielectric {
 
 impl Material for Dielectric {
     fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour {
+        // TODO: change to stochastic ray generation to avoid branching
         let ratio = if hit.entering {
             1.0003 / self.refractive_index
         } else {
