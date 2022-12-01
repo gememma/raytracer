@@ -1,4 +1,4 @@
-use glam::{Affine3A, Vec3A};
+use glam::{Affine3A, Vec3, Vec3A};
 use rand::Rng;
 use raytracer::{
     colour::Colour,
@@ -6,7 +6,10 @@ use raytracer::{
     fullcamera::FullCamera,
     light::{directional::Directional, point::Point},
     material::{dielectric::Dielectric, metallic::Metallic, phong::Phong},
-    object::{plane::Plane, polymesh::PolyMesh, sphere::Sphere, triangle::Triangle, Object},
+    object::{
+        plane::Plane, polymesh::PolyMesh, quadratic::Quadratic, sphere::Sphere, triangle::Triangle,
+        Object,
+    },
     scene::Scene,
     Vertex,
 };
@@ -21,18 +24,19 @@ fn main() {
 
     // Setup the scene
     // build_scene(&mut scene);
-    build_c_box(&mut scene);
+    // build_c_box(&mut scene);
+    build_quad_scene(&mut scene);
 
     // Declare a camera
     let camera = FullCamera::new(
         1.,
+        Vertex::new(0., 20., -8.),
         Vertex::new(0., 0., 0.),
-        Vertex::new(0., 0., 5.),
-        Vec3A::new(0., 1., 0.),
+        Vec3A::new(0., 0., 0.),
         fb.width(),
         fb.height(),
-        100,
-        0.3,
+        20,
+        0.,
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
@@ -45,6 +49,19 @@ fn main() {
         .expect("failed to write depth output to PNG file");
 }
 
+// dead code is allowed due to switching scenes
+
+fn build_quad_scene(scene: &mut Scene) {
+    // quad surface
+    let q = Quadratic::new(1., 0., 0., 0., 1., 0., 0., 1., 0., 1.);
+    scene.add_object(q);
+
+    // lighting
+    let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
+    scene.add_light(dl);
+}
+
+#[allow(dead_code)]
 fn build_c_box(scene: &mut Scene) {
     // materials
     let mat_white = Phong::new(
@@ -62,6 +79,12 @@ fn build_c_box(scene: &mut Scene) {
     let mat_green = Phong::new(
         Colour::from_rgb(0., 0.2, 0.),
         Colour::from_rgb(0., 0.4, 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    let mat_blue = Phong::new(
+        Colour::from_rgb(0., 0., 0.2),
+        Colour::from_rgb(0., 0., 0.4),
         Colour::from_rgb(0.5, 0.5, 0.5),
         40.,
     );
@@ -156,9 +179,9 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.5), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
     let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 4.5), 0.4);
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
     spherem.set_material(Box::new(mat_white.clone()));
     spherer.set_material(Box::new(Metallic::new(
@@ -200,7 +223,7 @@ fn build_scene(scene: &mut Scene) {
     pm.apply_transform(transform);
 
     let mut ground = Plane::new(Vec3A::new(0., 1., 0.), Vertex::new(0., -3.5, 0.));
-    let mut sphere = Sphere::new(Vertex::new(2.1, 1.2, 4.), 0.8);
+    let mut sphere = Sphere::new(Vertex::new(0., 0., 0.), 0.8);
 
     // Create lighting
     let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
@@ -226,7 +249,8 @@ fn build_scene(scene: &mut Scene) {
     scene.add_object(ground);
 
     let met1 = Metallic::new(Colour::from_rgb(0.6, 0.8, 0.8), 40.);
-    sphere.set_material(Box::new(met1));
+    // sphere.set_material(Box::new(met1));
+    sphere.set_material(Box::new(Dielectric::new(1.66)));
     scene.add_object(sphere);
 
     // Create 9 random colour/size/position spheres
@@ -241,4 +265,27 @@ fn build_scene(scene: &mut Scene) {
         )));
         scene.add_object(sphere);
     }
+
+    let mat_white = Phong::new(
+        Colour::from_rgb(0.1, 0.1, 0.1),
+        Colour::from_rgb(0.6, 0.6, 0.6),
+        Colour::from_rgb(0.4, 0.4, 0.4),
+        40.,
+    );
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., 5., 10.),
+            Vec3A::new(5., 5., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(5., 5., 10.),
+            Vec3A::new(5., -3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
 }

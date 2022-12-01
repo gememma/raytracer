@@ -48,22 +48,16 @@ impl Material for Dielectric {
             .min(1.);
         let sin_theta = (1. - cos_theta.powi(2)).sqrt();
         let refl_probability = Dielectric::reflectance(cos_theta, ratio);
-        let r = hit.incident.direction.reflect(hit.normal);
-        if ratio * sin_theta > 1. {
-            // cannot refract, total internal reflection occurs
+        if ratio * sin_theta <= 1. && random::<f32>() > refl_probability {
+            let r = Dielectric::refract(hit, ratio);
             scene
                 .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
                 .0
         } else {
-            let r1 = Dielectric::refract(hit, ratio);
-            (scene
+            let r = hit.incident.direction.reflect(hit.normal);
+            scene
                 .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
                 .0
-                * refl_probability)
-                + (scene
-                    .raytrace(Ray::new(hit.position + 0.001 * r1, r1), recurse - 1, viewer)
-                    .0
-                    * (1. - refl_probability))
         }
     }
 }
