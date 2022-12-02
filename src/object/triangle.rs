@@ -42,10 +42,6 @@ impl Triangle {
 }
 
 impl Object for Triangle {
-    fn material(&self) -> &dyn Material {
-        &*self.material
-    }
-
     fn set_material(&mut self, material: Box<dyn Material>) {
         self.material = material;
     }
@@ -89,6 +85,7 @@ impl Object for Triangle {
                 t,
                 entering: true,
                 object_hit: self,
+                material: &*self.material,
                 position: ray.position + ray.direction * t,
                 normal: normal.normalize(),
                 incident: ray.clone(),

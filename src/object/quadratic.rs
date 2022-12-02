@@ -34,10 +34,6 @@ impl Quadratic {
 }
 
 impl Object for Quadratic {
-    fn material(&self) -> &dyn Material {
-        &*self.material
-    }
-
     fn set_material(&mut self, material: Box<dyn Material>) {
         self.material = material;
     }
@@ -111,6 +107,7 @@ impl Object for Quadratic {
                 t,
                 entering,
                 object_hit: self,
+                material: &*self.material,
                 position: hit_pos,
                 normal,
                 incident: ray.clone(),

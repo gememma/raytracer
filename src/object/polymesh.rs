@@ -133,10 +133,6 @@ impl PolyMesh {
 }
 
 impl Object for PolyMesh {
-    fn material(&self) -> &dyn Material {
-        &*self.material
-    }
-
     fn set_material(&mut self, material: Box<dyn Material>) {
         self.material = material;
     }
@@ -183,6 +179,7 @@ impl Object for PolyMesh {
                     t,
                     entering,
                     object_hit: self,
+                    material: &*self.material,
                     position: ray.position + ray.direction * t,
                     normal: plane_normal.normalize(),
                     incident: ray.clone(),

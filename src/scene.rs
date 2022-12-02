@@ -72,12 +72,7 @@ impl Scene {
 
         if let Some(best) = best_hit {
             let viewer = (viewer - best.position).normalize();
-            (
-                best.object_hit
-                    .material()
-                    .compute(viewer, &best, recurse, self),
-                best.t,
-            )
+            (best.material.compute(viewer, &best, recurse, self), best.t)
         } else {
             // background colour
             (Colour::from_rgba(0.2, 0.2, 0.3, 1.), 0.)

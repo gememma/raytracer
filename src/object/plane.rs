@@ -26,10 +26,6 @@ impl Plane {
 }
 
 impl Object for Plane {
-    fn material(&self) -> &dyn Material {
-        &*self.material
-    }
-
     fn set_material(&mut self, material: Box<dyn Material>) {
         self.material = material;
     }
@@ -49,6 +45,7 @@ impl Object for Plane {
             t,
             entering: self.normal.dot(ray.direction) < 0.,
             object_hit: self,
+            material: &*self.material,
             position: ray.position + ray.direction * t,
             normal: self.normal,
             incident: ray.clone(),

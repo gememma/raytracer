@@ -26,10 +26,6 @@ impl Sphere {
 }
 
 impl Object for Sphere {
-    fn material(&self) -> &dyn Material {
-        &*self.material
-    }
-
     fn set_material(&mut self, material: Box<dyn Material>) {
         self.material = material;
     }
@@ -61,6 +57,7 @@ impl Object for Sphere {
                 t: t0,
                 entering: true,
                 object_hit: self,
+                material: &*self.material,
                 position: position0,
                 normal: (position0 - self.center).normalize(),
                 incident: ray.clone(),
@@ -75,6 +72,7 @@ impl Object for Sphere {
                 t: t1,
                 entering: false,
                 object_hit: self,
+                material: &*self.material,
                 position: position1,
                 normal: (position1 - self.center).normalize(),
                 incident: ray.clone(),
