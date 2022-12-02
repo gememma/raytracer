@@ -43,6 +43,7 @@ impl Object for Quadratic {
     }
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
+        // TODO: fix refraction term for dialectric material
         let epsilon = 0.0000001;
         let [dx, dy, dz] = [ray.direction.x, ray.direction.y, ray.direction.z];
         let [px, py, pz] = [ray.position.x, ray.position.y, ray.position.z];
@@ -53,7 +54,7 @@ impl Object for Quadratic {
             + 2. * self.coeffs[2] * dx * dz
             + self.coeffs[4] * dy.powi(2)
             + 2. * self.coeffs[5] * dy * dz
-            + self.coeffs[6] * dz.powi(2);
+            + self.coeffs[7] * dz.powi(2);
         if aq > -epsilon && aq < epsilon {
             // only one intersection, ignore
             return Vec::new();
@@ -89,20 +90,20 @@ impl Object for Quadratic {
 
         let mut hits = vec![];
         for t in vec![t0, t1] {
-            let position = ray.position + t * ray.direction;
+            let hit_pos = ray.position + t * ray.direction;
             let normal = Vec3A::new(
-                (self.coeffs[0] * position.x
-                    + self.coeffs[1] * position.y
-                    + self.coeffs[2] * position.z
-                    + self.coeffs[3]),
-                (self.coeffs[1] * position.x
-                    + self.coeffs[4] * position.y
-                    + self.coeffs[5] * position.z
-                    + self.coeffs[6]),
-                (self.coeffs[2] * position.x
-                    + self.coeffs[5] * position.y
-                    + self.coeffs[7] * position.z
-                    + self.coeffs[8]),
+                self.coeffs[0] * hit_pos.x
+                    + self.coeffs[1] * hit_pos.y
+                    + self.coeffs[2] * hit_pos.z
+                    + self.coeffs[3],
+                self.coeffs[1] * hit_pos.x
+                    + self.coeffs[4] * hit_pos.y
+                    + self.coeffs[5] * hit_pos.z
+                    + self.coeffs[6],
+                self.coeffs[2] * hit_pos.x
+                    + self.coeffs[5] * hit_pos.y
+                    + self.coeffs[7] * hit_pos.z
+                    + self.coeffs[8],
             )
             .normalize();
             let entering = normal.dot(ray.direction) < 0.;
@@ -110,7 +111,7 @@ impl Object for Quadratic {
                 t,
                 entering,
                 object_hit: self,
-                position,
+                position: hit_pos,
                 normal,
                 incident: ray.clone(),
             };
@@ -120,7 +121,43 @@ impl Object for Quadratic {
     }
 
     fn apply_transform(&mut self, t: Affine3A) {
-        // self.matrix = t.matrix3.transpose() * self.matrix * t.matrix3;
-        todo!()
+        // TODO: fix inverted translation
+        let t_matrix = Mat4::from(t);
+        let q_matrix = Mat4::from_cols_array(&[
+            self.coeffs[0],
+            self.coeffs[1],
+            self.coeffs[2],
+            self.coeffs[3],
+            self.coeffs[1],
+            self.coeffs[4],
+            self.coeffs[5],
+            self.coeffs[6],
+            self.coeffs[2],
+            self.coeffs[5],
+            self.coeffs[7],
+            self.coeffs[8],
+            self.coeffs[3],
+            self.coeffs[6],
+            self.coeffs[8],
+            self.coeffs[9],
+        ]);
+        let q_prime = t_matrix.transpose() * q_matrix * t_matrix;
+
+        // extract coefficients from answer
+        [
+            self.coeffs[0],
+            self.coeffs[1],
+            self.coeffs[2],
+            self.coeffs[3],
+        ] = [
+            q_prime.x_axis.x,
+            q_prime.x_axis.y,
+            q_prime.x_axis.z,
+            q_prime.x_axis.w,
+        ];
+        [self.coeffs[4], self.coeffs[5], self.coeffs[6]] =
+            [q_prime.y_axis.y, q_prime.y_axis.z, q_prime.y_axis.w];
+        [self.coeffs[7], self.coeffs[8], self.coeffs[9]] =
+            [q_prime.z_axis.z, q_prime.z_axis.w, q_prime.w_axis.w];
     }
 }

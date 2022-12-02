@@ -24,18 +24,18 @@ fn main() {
 
     // Setup the scene
     // build_scene(&mut scene);
-    // build_c_box(&mut scene);
-    build_quad_scene(&mut scene);
+    build_c_box(&mut scene);
+    // build_quad_scene(&mut scene);
 
     // Declare a camera
     let camera = FullCamera::new(
         1.,
-        Vertex::new(0., 20., -8.),
         Vertex::new(0., 0., 0.),
-        Vec3A::new(0., 0., 0.),
+        Vertex::new(0., 0., 4.),
+        Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
-        20,
+        50,
         0.,
     );
 
@@ -52,13 +52,141 @@ fn main() {
 // dead code is allowed due to switching scenes
 
 fn build_quad_scene(scene: &mut Scene) {
+    // materials
+    let mat_white = Phong::new(
+        Colour::from_rgb(0.1, 0.1, 0.1),
+        Colour::from_rgb(0.6, 0.6, 0.6),
+        Colour::from_rgb(0.4, 0.4, 0.4),
+        40.,
+    );
+    let mat_red = Phong::new(
+        Colour::from_rgb(0.2, 0., 0.),
+        Colour::from_rgb(0.4, 0., 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    let mat_green = Phong::new(
+        Colour::from_rgb(0., 0.2, 0.),
+        Colour::from_rgb(0., 0.4, 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    let mat_glass = Dielectric::new(1.52);
+    // floor
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., -3., 4.),
+            Vec3A::new(3., -3., 4.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., -3., 4.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
+    // ceiling
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., 3., 4.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., 3., 4.),
+            Vec3A::new(-3., 3., 4.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
+    // left wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., 3., 4.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_red.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., -3., 4.),
+            Vec3A::new(-3., 3., 4.),
+        ],
+        Box::new(mat_red.clone()),
+    ));
+
+    // right wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., 3., 4.),
+            Vec3A::new(3., -3., 4.),
+        ],
+        Box::new(mat_green.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., -3., 4.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_green.clone()),
+    ));
+
+    // back wall
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(-3., -3., 10.),
+            Vec3A::new(-3., 3., 10.),
+            Vec3A::new(3., 3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+    scene.add_object(Triangle::new_with_material(
+        [
+            Vec3A::new(3., 3., 10.),
+            Vec3A::new(3., -3., 10.),
+            Vec3A::new(-3., -3., 10.),
+        ],
+        Box::new(mat_white.clone()),
+    ));
+
     // quad surface
-    let q = Quadratic::new(1., 0., 0., 0., 1., 0., 0., 1., 0., 1.);
+    let mut q = Quadratic::new(1., 0., 0., 0., 1., 0., 0., 1., 0., -0.4);
+    q.apply_transform(Affine3A::from_translation(Vec3::new(1., -1., -4.)));
+    // q.set_material(Box::new(mat_glass.clone()));
+    q.set_material(Box::new(Metallic::new(
+        Colour::from_rgb(0.6, 0.6, 0.6),
+        40.,
+    )));
+    // q.set_material(Box::new(Phong::new(
+    //     Colour::from_rgb(0.1, 0.1, 0.1),
+    //     Colour::from_rgb(0.6, 0.6, 0.6),
+    //     Colour::from_rgb(0.4, 0.4, 0.4),
+    //     40.,
+    // )));
     scene.add_object(q);
 
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 4.), 0.4);
+    spherer.set_material(Box::new(mat_glass.clone()));
+    scene.add_object(spherer);
+
     // lighting
-    let dl = Directional::new(Vec3A::new(0.5, -1., 0.5), Colour::from_rgba(1., 1., 1., 0.));
-    scene.add_light(dl);
+    scene.add_light(Point::new(
+        Vec3A::new(0., 2., 1.),
+        Colour::from_rgba(1., 1., 1., 0.),
+    ));
 }
 
 #[allow(dead_code)]
