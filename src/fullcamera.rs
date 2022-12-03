@@ -3,7 +3,9 @@ use std::{sync::mpsc::channel, thread};
 use glam::Vec3A;
 use rand::Rng;
 
-use crate::{colour::Colour, framebuffer::FrameBuffer, ray::Ray, scene::Scene, Vertex};
+use crate::{
+    colour::Colour, framebuffer::FrameBuffer, photonmap::PhotonMap, ray::Ray, scene::Scene, Vertex,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FullCamera {
@@ -75,7 +77,7 @@ impl FullCamera {
                 .normalize(),
         )
     }
-    pub fn render(&self, env: Scene, fb: &mut FrameBuffer) {
+    pub fn render(&self, env: &Scene, fb: &mut FrameBuffer) {
         // This method spawns threads that raytrace in parallel for speed
         thread::scope(|s| {
             let (tx, rx) = channel();
@@ -86,7 +88,6 @@ impl FullCamera {
                 let endy = starty + fb.height() / thread_num;
 
                 let width = fb.width();
-                let env = &env;
 
                 s.spawn(move || {
                     for y in starty..endy {
@@ -108,6 +109,51 @@ impl FullCamera {
                 while let Ok((colour, depth, x, y)) = rx.recv() {
                     fb.plot_pixel(x, fb.height() - y - 1, colour.r, colour.g, colour.b);
                     fb.plot_depth(x, fb.height() - y - 1, depth);
+                }
+            });
+        });
+    }
+    pub fn visualise_photons(&self, map: &PhotonMap, env: &Scene, fb: &mut FrameBuffer) {
+        thread::scope(|s| {
+            let (tx, rx) = channel();
+            let thread_num = 8;
+            for i in 0..thread_num {
+                let tx = tx.clone();
+                let starty = i * fb.height() / thread_num;
+                let endy = starty + fb.height() / thread_num;
+
+                let width = fb.width();
+
+                s.spawn(move || {
+                    for y in starty..endy {
+                        for x in 0..width {
+                            let mut colour = Colour::default();
+                            let mut max_n = 0;
+                            for _ in 0..self.samples {
+                                let ray = self.get_ray_pixel(x, y);
+                                if let Some(best_hit) = env.trace(&ray) {
+                                    let (colourtmp, n) = map.visualise(best_hit.position);
+                                    colour += colourtmp / self.samples as f32 * n as f32;
+                                    max_n = max_n.max(n);
+                                }
+                            }
+                            tx.send((colour, max_n, x, y)).unwrap();
+                        }
+                    }
+                });
+            }
+            s.spawn(move || {
+                let mut max_n = 0;
+                while let Ok((colour, n, x, y)) = rx.recv() {
+                    max_n = max_n.max(n);
+                    fb.plot_pixel(x, fb.height() - y - 1, colour.r, colour.g, colour.b);
+                }
+                for y in 0..fb.height() {
+                    for x in 0..fb.width() {
+                        // replot pixels by adjusting for photon neighbour number
+                        let c = fb.get_pixel(x, y) / max_n as f32;
+                        fb.plot_pixel(x, y, c.r, c.g, c.b);
+                    }
                 }
             });
         });

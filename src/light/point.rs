@@ -1,6 +1,13 @@
 use glam::Vec3A;
+use rand::Rng;
 
-use crate::{colour::Colour, light::Light, Vertex};
+use crate::{
+    colour::Colour,
+    light::Light,
+    photonmap::{Photon, Type},
+    ray::Ray,
+    Vertex,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Point {
@@ -33,5 +40,28 @@ impl Light for Point {
 
     fn get_intensity(&self, _surface: Vertex) -> Colour {
         self.intensity
+    }
+
+    fn generate_photon(&self) -> Photon {
+        let direction = random_in_unit_sphere();
+        Photon {
+            ray: Ray::new(self.position, direction),
+            colour: self.intensity,
+            type_: Type::Direct,
+        }
+    }
+}
+
+pub fn random_in_unit_sphere() -> Vec3A {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p = Vec3A::new(
+            rng.gen_range(-1.0..1.0),
+            rng.gen_range(-1.0..1.0),
+            rng.gen_range(-1.0..1.0),
+        );
+        if p.length_squared() < 1. {
+            return p;
+        }
     }
 }

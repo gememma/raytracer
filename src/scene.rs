@@ -52,7 +52,7 @@ impl Scene {
 }
 
 impl Scene {
-    pub fn shadowtrace(&self, ray: &Ray, limit: f32) -> bool {
+    pub fn shadow_trace(&self, ray: &Ray, limit: f32) -> bool {
         for object in &self.object_list {
             if let Some(hit) = Self::select_first(object.intersection(ray)) {
                 if hit.t > 0.0000001 && hit.t < limit {

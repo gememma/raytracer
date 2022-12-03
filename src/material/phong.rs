@@ -57,7 +57,7 @@ impl Material for Phong {
 
             if lit {
                 lit = !scene
-                    .shadowtrace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
+                    .shadow_trace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
             }
 
             if lit {

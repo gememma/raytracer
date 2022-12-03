@@ -15,6 +15,7 @@ use raytracer::{
         triangle::Triangle,
         Object,
     },
+    photonmap::PhotonMap,
     scene::Scene,
     Vertex,
 };
@@ -23,15 +24,16 @@ fn main() {
     // Create a framebuffer
     // let mut fb = FrameBuffer::new(2048, 2048);
     let mut fb = FrameBuffer::default();
+    let mut photons_fb = FrameBuffer::default();
 
     // Create a scene
     let mut scene = Scene::default();
 
     // Setup the scene
     // build_scene(&mut scene);
-    // build_c_box(&mut scene);
+    build_c_box(&mut scene);
     // build_quad_scene(&mut scene);
-    build_csg_scene(&mut scene);
+    // build_csg_scene(&mut scene);
 
     // Declare a camera
     let camera = FullCamera::new(
@@ -46,13 +48,15 @@ fn main() {
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
-    camera.render(scene, &mut fb);
+    camera.render(&scene, &mut fb);
+    camera.visualise_photons(&PhotonMap::build(&scene), &scene, &mut photons_fb);
 
     // Output the framebuffer colour and depth as two images
     fb.write_rgb_png("test.png")
         .expect("failed to write RGB output to PNG file");
     fb.write_depth_png("depth.png")
         .expect("failed to write depth output to PNG file");
+    photons_fb.write_rgb_png("photons.png").expect("f");
 }
 
 // dead code is allowed due to switching scenes

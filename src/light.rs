@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use glam::Vec3A;
 
-use crate::{colour::Colour, Vertex};
+use crate::{colour::Colour, photonmap::Photon, Vertex};
 
 pub mod directional;
 pub mod point;
@@ -12,4 +12,6 @@ pub trait Light: Debug {
     fn get_direction(&self, surface: Vertex) -> (Vec3A, bool);
 
     fn get_intensity(&self, surface: Vertex) -> Colour;
+
+    fn generate_photon(&self) -> Photon;
 }

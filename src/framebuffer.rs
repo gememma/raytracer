@@ -40,12 +40,8 @@ impl FrameBuffer {
     pub fn plot_depth(&mut self, x: usize, y: usize, depth: f32) {
         self.buf[y * self.width + x].depth = depth;
     }
-    pub fn get_pixel(&self, x: usize, y: usize) -> (f32, f32, f32) {
-        (
-            self.buf[y * self.width + x].colour.r,
-            self.buf[y * self.width + x].colour.g,
-            self.buf[y * self.width + x].colour.b,
-        )
+    pub fn get_pixel(&self, x: usize, y: usize) -> Colour {
+        self.buf[y * self.width + x].colour
     }
     pub fn get_depth(&self, x: usize, y: usize) -> f32 {
         self.buf[y * self.width + x].depth

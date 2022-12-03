@@ -8,6 +8,7 @@ pub mod light;
 pub mod linedrawer;
 pub mod material;
 pub mod object;
+pub mod photonmap;
 pub mod ray;
 pub mod scene;
 

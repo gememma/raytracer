@@ -6,7 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+acap = "0.3.0"
 glam = "0.21.3"
 indicatif = "0.17.1"
 png = "0.17.6"
 rand = "0.8.5"
+
+[profile.dev]
+opt-level = 3

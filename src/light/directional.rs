@@ -1,7 +1,7 @@
 use glam::Vec3A;
 
 use super::Light;
-use crate::{colour::Colour, Vertex};
+use crate::{colour::Colour, photonmap::Photon, Vertex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Directional {
@@ -34,5 +34,10 @@ impl Light for Directional {
 
     fn get_intensity(&self, _surface: Vertex) -> Colour {
         self.intensity
+    }
+
+    fn generate_photon(&self) -> Photon {
+        // cannot generate a photon an infinite distance away
+        unimplemented!()
     }
 }
