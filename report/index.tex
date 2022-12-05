@@ -1,0 +1,42 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{appendix}
+\usepackage{tabu}
+\usepackage{minted}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+% \usepackage{titlesec}
+% last package to load
+\usepackage[hidelinks]{hyperref}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+% [minted] Set highlighting style
+\usemintedstyle{tango}
+\newminted{c}{breaklines=true}
+
+\setlength{\columnsep}{0.5in}
+
+\title{CM30075 Advanced Computer Graphics: Raytracer Report}
+\author{Candidate 21532}
+\date{December 2022}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+% image example
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width = 0.7\textwidth]{img/graph1.png}
+    \caption{Time taken for program execution against thread count.}\label{fig:figure1}
+\end{figure*}
+
+
+
+\end{document}

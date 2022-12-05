@@ -4,3 +4,6 @@ test.ppm
 test.png
 depth.ppm
 depth.png
+
+/report/build
+/report/.vscode
