@@ -1,7 +1,7 @@
 use glam::Vec3A;
 
 use super::Material;
-use crate::{colour::Colour, hit::Hit, scene::Scene};
+use crate::{colour::Colour, hit::Hit, photonmap::Interaction, scene::Scene};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct NormalShading;
@@ -13,5 +13,9 @@ impl Material for NormalShading {
             (hit.normal.y + 1.) * 0.5,
             (-hit.normal.z + 1.) * 0.5,
         )
+    }
+
+    fn interact(&self, _hit: &Hit) -> Interaction {
+        Interaction::Absorbed
     }
 }

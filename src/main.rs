@@ -22,7 +22,6 @@ use raytracer::{
 
 fn main() {
     // Create a framebuffer
-    // let mut fb = FrameBuffer::new(2048, 2048);
     let mut fb = FrameBuffer::default();
     let mut photons_fb = FrameBuffer::default();
 
@@ -48,8 +47,9 @@ fn main() {
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
+    let pmap = PhotonMap::build(&scene);
     camera.render(&scene, &mut fb);
-    camera.visualise_photons(&PhotonMap::build(&scene), &scene, &mut photons_fb);
+    camera.visualise_photons(&pmap, &scene, &mut photons_fb);
 
     // Output the framebuffer colour and depth as two images
     fb.write_rgb_png("test.png")
@@ -60,7 +60,7 @@ fn main() {
 }
 
 // dead code is allowed due to switching scenes
-
+#[allow(dead_code)]
 fn build_quad_scene(scene: &mut Scene) {
     // materials
     let mat_white = Phong::new(

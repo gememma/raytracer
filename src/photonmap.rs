@@ -1,6 +1,6 @@
 use acap::{kd::KdTree, Coordinates, Euclidean, EuclideanDistance, NearestNeighbors, Proximity};
 
-use crate::{colour::Colour, ray::Ray, scene::Scene, Vertex};
+use crate::{colour::Colour, hit::Hit, ray::Ray, scene::Scene, Vertex};
 
 pub struct PhotonMap {
     tree: KdTree<PhotonHit>,
@@ -23,6 +23,12 @@ pub enum Type {
     Shadow,
 }
 
+pub enum Interaction {
+    Reflected { ray: Ray, attenuation: Colour },
+    Transmitted { ray: Ray, attenuation: Colour },
+    Absorbed,
+}
+
 impl PhotonMap {
     pub fn build(scene: &Scene) -> Self {
         let mut tree = KdTree::new();
@@ -30,12 +36,31 @@ impl PhotonMap {
         // direct hits
         for light in &scene.light_list {
             for _ in 0..5000 {
-                let p = light.generate_photon();
-                if let Some(h) = scene.trace(&p.ray) {
-                    tree.push(PhotonHit {
-                        photon: p,
-                        position: h.position,
-                    })
+                let mut p = light.generate_photon();
+                let mut depth = 5;
+                'l: while let Some((ph, h)) = Self::photon_trace(scene, p) {
+                    let c = ph.photon.colour;
+                    tree.push(ph);
+
+                    if depth < 1 {
+                        break 'l;
+                    } else {
+                        depth -= 1;
+                    }
+
+                    match h.material.interact(&h) {
+                        Interaction::Reflected { ray, attenuation }
+                        | Interaction::Transmitted { ray, attenuation } => {
+                            p = Photon {
+                                ray,
+                                colour: attenuation * c,
+                                type_: Type::Indirect,
+                            }
+                        }
+                        Interaction::Absorbed => {
+                            break 'l;
+                        }
+                    }
                 }
             }
         }
@@ -44,6 +69,22 @@ impl PhotonMap {
         tree.balance();
         PhotonMap { tree }
     }
+
+    pub fn photon_trace<'a>(scene: &'a Scene, photon: Photon) -> Option<(PhotonHit, Hit<'a>)> {
+        // indirect and shadow photons
+        if let Some(h) = scene.trace(&photon.ray) {
+            Some((
+                PhotonHit {
+                    photon: photon,
+                    position: h.position,
+                },
+                h,
+            ))
+        } else {
+            None
+        }
+    }
+
     pub fn visualise(&self, pos: Vertex) -> (Colour, usize) {
         let nearest = self.tree.k_nearest_within(&[pos.x, pos.y, pos.z], 1000, 1.);
         let mut colour = Colour::default();

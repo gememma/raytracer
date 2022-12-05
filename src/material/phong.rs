@@ -1,9 +1,11 @@
 use glam::Vec3A;
+use rand::{random, Rng};
 
 use super::Material;
 use crate::{
     colour::Colour,
     hit::Hit,
+    photonmap::Interaction,
     ray::{Ray, Reflectable},
     scene::Scene,
 };
@@ -66,5 +68,33 @@ impl Material for Phong {
             }
         }
         colour
+    }
+
+    fn interact(&self, hit: &Hit) -> Interaction {
+        // let diffuse_p = (self.diffuse.r + self.diffuse.g + self.diffuse.b) / 3.;
+        // if random::<f32>() > diffuse_p {
+        //     Interaction::Absorbed
+        // } else {
+        let r = random_in_unit_hemisphere(hit.normal);
+        let ray = Ray::new(hit.position + 0.0001 * r, r);
+        Interaction::Reflected {
+            ray,
+            attenuation: self.diffuse,
+        }
+        // }
+    }
+}
+
+pub fn random_in_unit_hemisphere(normal: Vec3A) -> Vec3A {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p = Vec3A::new(
+            rng.gen_range(-1.0..1.0),
+            rng.gen_range(-1.0..1.0),
+            rng.gen_range(-1.0..1.0),
+        );
+        if p.length_squared() < 1. || p.dot(normal) > 0. {
+            return p;
+        }
     }
 }

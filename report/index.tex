@@ -31,12 +31,68 @@
 \tableofcontents
 
 % image example
-\begin{figure*}[h]
-    \centering
-    \includegraphics[width = 0.7\textwidth]{img/graph1.png}
-    \caption{Time taken for program execution against thread count.}\label{fig:figure1}
-\end{figure*}
+% \begin{figure*}[h]
+%     \centering
+%     \includegraphics[width = 0.7\textwidth]{img/graph1.png}
+%     \caption{Time taken for program execution against thread count.}\label{fig:figure1}
+% \end{figure*}
 
+\section{Overview}
+\subsection{Ray tracing}
+Ray tracing is a method used in computer graphics to simulate light moving through a three-dimensional scene. This report accompanies a piece of software that uses ray tracing to produce an image using the famous Utah teapot model.
 
+\subsection{Language and Libraries}
+\paragraph{Rust} The software is written in Rust \cite{}. Rust was chosen for this project because of its speed and support for multi-threading. It is also fairly similar to the more commonly-used C++, making the translation of starter code fairly simple.
+
+\paragraph{Glam} Glam is a library that provides types and methods for vectors, one of the foundations of graphics software. There are also types that are safe to use in parallel, perfect for ray tracing, and a type for a 3D transformations.
+
+\paragraph{png} The software writes the pixel data produced into a .png image file. The png library allows this, and is easier than writing to a .ppm file and then converting it manually, despite the simplicity of the .ppm format. The library also handles the complexity of properly adjusting the colours if the image produced is too bright or dark.
+
+\paragraph{Acap} ``As close as possible'', abbreviated to acap, is a library that provides a number of different data structures which support search by proximity, including a KD tree. The library also includes methods for balancing and searching automatically.
+
+\subsection{Structure}
+The program is separated into multiple files, grouped by the types and traits that they contain. For types that implement a trait, their files are arranges into a folder names after the trait and the trait definition is in a file directly in the ``src'' folder. For example, the trait ``Object'' is defined in `src/object.rs' and the type ``Sphere'' that implements Object is defined in `src/object/sphere.rs'. Some files, like `src/photonmap.rs', define multiple related types.
+
+To run the program, you must have Rust installed: go to rustup.rs/ to do so. Then the command `cargo run --package raytracer --release' may be used. The program will produce .png files as output in the root folder of the project.
+
+The file `src/main.rs' contains the main function, which initialises the frame buffer, scene and camera before rendering the scene and photon map. Finally, it calls the buffer to write its data to a file. This file also contains the function that creates the scene by specifying objects and their materials, as well as lights.
+
+\section{Basic Raytracer}
+\subsection{Camera}
+In order to produce an image of a scene, a camera is used. The camera may be moved and rotated, its aperture adjusted, the number of samples per pixel altered, and an image size given. The camera position serves as the origin point for the rays that are fired through the image plane and into the scene. Each ray returns a colour which contributes to the final colour of the corresponding pixel it passes through.
+
+\paragraph{Multisampling} To create a more accurate image, multiple rays (samples) are fired through each pixel, and they all contribute equally to the final colour. The rays are fired with a small element of randomness to prevent them all taking the same path. Multisampling also allows the number of rays in the scene to be controlled. Although there are a greater number of rays per pixel, rays can be reflected or refracted (Section \ref{ss:reflandrefr}) stochastically (based on probability) rather than ``branching'', which generates multiple new rays from an intersection. Generating multiple new rays can result in a much greater quantity of them in the scene, slowing down the runtime considerably.
+
+In addition, this technique allows for depth of field in the image (Section \ref{ss:depthoffield}).
+
+\paragraph{Multithreading}
+
+\subsection{Objects}
+
+\subsection{Lighting}
+
+\section{Feature-Rich Rendering}
+\subsection{Reflection and Refraction}\label{ss:reflandrefr}
+
+\paragraph{Frenel Term}
+
+\subsection{CSG and Quadratic Surfaces}
+
+\subsection{Depth of Field}\label{ss:depthoffield}
+Depth of field refers to the fact that some objects appear sharp and others appear blurry, according to the distance of the objects from the camera's focal plane. This cannot be observed when the camera acts as a pinhole camera with a infinitely small aperture. Depth of field makes an image appear more realistic, simulating a non-pinhole camera, and the strength of the blur produced is controlled by the camera's aperture. A pinhole camera may still be simulated by using an aperture of $0.0$.
+
+\paragraph{The Thin Lens model}
+The ``Thin Lens'' model makes some generalisations about the physics of a real lens by assuming the lens' width is negligible compared to the distance from the lens to the focal plane. The focal plane is the same as the image plane in this implementation, as it locates the pixels of the final image, which should be in focus, relative to the 3D scene. The lens is implemented as a circular disc around the camera's position within which the rays are fired from. The greater the aperture, the more spread out the rays travelling towards a given pixel are, and the less "accurate" the final colour will be if the colour comes from an object far away from the focal plane.
+
+The offset of rays by some amount within the lens disc is achieved by generating a random vector within a unit disc and multiplying it by the camera's aperture. The direction of the ray also needs to be adjusted, otherwise it will not point exactly to the correct pixel, and objects that should be in focus would appear blurry.
+
+\section{Photon Mapping}
+\subsection{Theory}
+
+\paragraph{Colour Bleeding}
+
+\subsection{Photon Map}
+
+\subsection{Materials}
 
 \end{document}

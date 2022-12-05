@@ -5,6 +5,7 @@ use crate::{
     colour::Colour,
     hit::Hit,
     material::Material,
+    photonmap::Interaction,
     ray::{Ray, Reflectable},
     scene::Scene,
 };
@@ -37,6 +38,17 @@ impl Dielectric {
 
 impl Material for Dielectric {
     fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour {
+        let event = self.interact(hit);
+        if let Interaction::Transmitted { ray, attenuation } = event {
+            scene.raytrace(ray, recurse - 1, viewer).0
+        } else if let Interaction::Reflected { ray, attenuation } = event {
+            scene.raytrace(ray, recurse - 1, viewer).0
+        } else {
+            unreachable!()
+        }
+    }
+
+    fn interact(&self, hit: &Hit) -> Interaction {
         let ratio = if hit.entering {
             1.0003 / self.refractive_index
         } else {
@@ -49,14 +61,18 @@ impl Material for Dielectric {
         let refl_probability = Dielectric::reflectance(cos_theta, ratio);
         if ratio * sin_theta <= 1. && random::<f32>() > refl_probability {
             let r = Dielectric::refract(hit, ratio);
-            scene
-                .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
-                .0
+            let ray = Ray::new(hit.position + 0.001 * r, r);
+            Interaction::Transmitted {
+                ray,
+                attenuation: Colour::from_rgb(1., 1., 1.),
+            }
         } else {
             let r = hit.incident.direction.reflect(hit.normal);
-            scene
-                .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
-                .0
+            let ray = Ray::new(hit.position + 0.001 * r, r);
+            Interaction::Reflected {
+                ray,
+                attenuation: Colour::from_rgb(1., 1., 1.),
+            }
         }
     }
 }
