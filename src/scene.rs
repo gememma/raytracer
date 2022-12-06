@@ -1,4 +1,7 @@
-use crate::{colour::Colour, hit::Hit, light::Light, object::Object, ray::Ray, Vertex};
+use crate::{
+    colour::Colour, hit::Hit, light::Light, object::Object, photonmap::Interaction, ray::Ray,
+    Vertex,
+};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -56,7 +59,10 @@ impl Scene {
         for object in &self.object_list {
             if let Some(hit) = Self::select_first(object.intersection(ray)) {
                 if hit.t > 0.0000001 && hit.t < limit {
-                    return true;
+                    match hit.material.interact(&hit) {
+                        Interaction::Transmitted { .. } => continue,
+                        _ => return true,
+                    }
                 }
             }
         }
@@ -65,7 +71,7 @@ impl Scene {
 
     pub fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
         if recurse == 0 {
-            return (Colour::from_rgba(0.2, 0.2, 0.3, 1.), 0.);
+            return (Colour::from_rgba(0., 0., 0., 1.), 0.);
         }
         // find the closest object
         let best_hit = self.trace(&ray);
@@ -75,7 +81,7 @@ impl Scene {
             (best.material.compute(viewer, &best, recurse, self), best.t)
         } else {
             // background colour
-            (Colour::from_rgba(0.2, 0.2, 0.3, 1.), 0.)
+            (Colour::from_rgba(0., 0., 0., 1.), 0.)
         }
     }
 

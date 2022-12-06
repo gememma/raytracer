@@ -43,7 +43,6 @@ impl Phong {
 }
 
 impl Material for Phong {
-    // ambient term
     fn compute(&self, viewer: Vec3A, hit: &Hit, _recurse: usize, scene: &Scene) -> Colour {
         let ambient_intensity = 0.3;
         let mut colour = self.ambient * ambient_intensity;
@@ -71,17 +70,17 @@ impl Material for Phong {
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {
-        // let diffuse_p = (self.diffuse.r + self.diffuse.g + self.diffuse.b) / 3.;
-        // if random::<f32>() > diffuse_p {
-        //     Interaction::Absorbed
-        // } else {
-        let r = random_in_unit_hemisphere(hit.normal);
-        let ray = Ray::new(hit.position + 0.0001 * r, r);
-        Interaction::Reflected {
-            ray,
-            attenuation: self.diffuse,
+        let diffuse_p = (self.diffuse.r + self.diffuse.g + self.diffuse.b) / 3.;
+        if random::<f32>() > diffuse_p {
+            Interaction::Absorbed
+        } else {
+            let r = random_in_unit_hemisphere(hit.normal);
+            let ray = Ray::new(hit.position + 0.0001 * r, r);
+            Interaction::Reflected {
+                ray,
+                attenuation: self.diffuse,
+            }
         }
-        // }
     }
 }
 

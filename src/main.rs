@@ -5,7 +5,10 @@ use raytracer::{
     framebuffer::FrameBuffer,
     fullcamera::FullCamera,
     light::{directional::Directional, point::Point},
-    material::{dielectric::Dielectric, metallic::Metallic, phong::Phong},
+    material::{
+        compound::Compound, dielectric::Dielectric, diffuse::Diffuse, metallic::Metallic,
+        phong::Phong,
+    },
     object::{
         csg::{Csg, Op},
         plane::Plane,
@@ -42,8 +45,8 @@ fn main() {
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
-        50,
-        0.1,
+        100,
+        0.,
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
@@ -176,10 +179,7 @@ fn build_quad_scene(scene: &mut Scene) {
     let mut q = Quadratic::new(1., 0., 0., 0., 1., 0., 0., 1., 0., -0.4);
     q.apply_transform(Affine3A::from_translation(Vec3::new(1., -1., -4.)));
     // q.set_material(Box::new(mat_glass.clone()));
-    q.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        40.,
-    )));
+    q.set_material(Box::new(Metallic::new(Colour::from_rgb(0.6, 0.6, 0.6), 0.)));
     // q.set_material(Box::new(Phong::new(
     //     Colour::from_rgb(0.1, 0.1, 0.1),
     //     Colour::from_rgb(0.6, 0.6, 0.6),
@@ -202,31 +202,14 @@ fn build_quad_scene(scene: &mut Scene) {
 #[allow(dead_code)]
 fn build_c_box(scene: &mut Scene) {
     // materials
-    let mat_white = Phong::new(
-        Colour::from_rgb(0.1, 0.1, 0.1),
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        Colour::from_rgb(0.4, 0.4, 0.4),
-        40.,
-    );
-    let mat_red = Phong::new(
-        Colour::from_rgb(0.2, 0., 0.),
-        Colour::from_rgb(0.4, 0., 0.),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
-    let mat_green = Phong::new(
-        Colour::from_rgb(0., 0.2, 0.),
-        Colour::from_rgb(0., 0.4, 0.),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
-    let mat_blue = Phong::new(
-        Colour::from_rgb(0., 0., 0.2),
-        Colour::from_rgb(0., 0., 0.4),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
+    let mat_white = Diffuse::new(Colour::from_rgb(0.8, 0.8, 0.8));
+    let mat_red = Diffuse::new(Colour::from_rgb(0.8, 0.1, 0.1));
+    let mat_green = Diffuse::new(Colour::from_rgb(0.1, 0.8, 0.1));
     let mat_glass = Dielectric::new(1.52);
+    let mut mat_combo = Compound::new();
+    mat_combo.add_material(mat_red.clone());
+    mat_combo.add_material(Metallic::new(Colour::from_rgb(0.8, 0.1, 0.1), 0.));
+
     // floor
     scene.add_object(Triangle::new_with_material(
         [
@@ -317,23 +300,20 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
-    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 6.), 0.4);
+    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 6.), 0.4);
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 6.), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
     spherem.set_material(Box::new(mat_white.clone()));
-    spherer.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        40.,
-    )));
+    spherer.set_material(Box::new(Metallic::new(Colour::from_rgb(0.7, 0.7, 0.7), 0.)));
     scene.add_object(spherel);
     scene.add_object(spherem);
     scene.add_object(spherer);
 
     // lights
     scene.add_light(Point::new(
-        Vec3A::new(0., 2., 4.),
-        Colour::from_rgba(1., 1., 1., 0.),
+        Vec3A::new(0., 2., 3.),
+        Colour::from_rgb(1., 1., 1.),
     ));
 }
 
@@ -386,7 +366,7 @@ fn build_scene(scene: &mut Scene) {
     ground.set_material(Box::new(bp2));
     scene.add_object(ground);
 
-    let met1 = Metallic::new(Colour::from_rgb(0.6, 0.8, 0.8), 40.);
+    let met1 = Metallic::new(Colour::from_rgb(0.6, 0.8, 0.8), 0.);
     // sphere.set_material(Box::new(met1));
     sphere.set_material(Box::new(Dielectric::new(1.66)));
     scene.add_object(sphere);
@@ -552,14 +532,8 @@ fn build_csg_scene(scene: &mut Scene) {
     // spherel.set_material(Box::new(mat_glass.clone()));
     spherer.set_material(Box::new(mat_glass.clone()));
     spherem2.set_material(Box::new(mat_glass.clone()));
-    spherem.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        40.,
-    )));
-    spherel.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        40.,
-    )));
+    spherem.set_material(Box::new(Metallic::new(Colour::from_rgb(0.6, 0.6, 0.6), 0.)));
+    spherel.set_material(Box::new(Metallic::new(Colour::from_rgb(0.6, 0.6, 0.6), 0.)));
     // scene.add_object(spherel);
     // scene.add_object(spherem);
     // scene.add_object(spherer);

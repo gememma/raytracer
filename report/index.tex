@@ -61,18 +61,42 @@ The file `src/main.rs' contains the main function, which initialises the frame b
 \subsection{Camera}
 In order to produce an image of a scene, a camera is used. The camera may be moved and rotated, its aperture adjusted, the number of samples per pixel altered, and an image size given. The camera position serves as the origin point for the rays that are fired through the image plane and into the scene. Each ray returns a colour which contributes to the final colour of the corresponding pixel it passes through.
 
-\paragraph{Multisampling} To create a more accurate image, multiple rays (samples) are fired through each pixel, and they all contribute equally to the final colour. The rays are fired with a small element of randomness to prevent them all taking the same path. Multisampling also allows the number of rays in the scene to be controlled. Although there are a greater number of rays per pixel, rays can be reflected or refracted (Section \ref{ss:reflandrefr}) stochastically (based on probability) rather than ``branching'', which generates multiple new rays from an intersection. Generating multiple new rays can result in a much greater quantity of them in the scene, slowing down the runtime considerably.
+\paragraph{Multisampling} To create a more accurate image, multiple rays (samples) are fired through each pixel, and they all contribute equally to the final colour. The rays are fired with a small element of randomness to prevent them all taking the same path. Multisampling also allows the number of rays in the scene to be controlled. Although there are a greater number of rays per pixel, rays can be reflected or refracted (Section \ref{ss:reflandrefr}) stochastically (also called ``Russian roulette'' in the context of photons) rather than ``branching'', which generates multiple new rays from an intersection. Generating multiple new rays can result in a much greater quantity of them in the scene, slowing down the runtime considerably.
 
 In addition, this technique allows for depth of field in the image (Section \ref{ss:depthoffield}).
 
 \paragraph{Multithreading}
+The camera runs a function `render()' to produce the data for each pixel. The image is divided into 8 sections vertically so that 8 threads can run potentially at the same time on 8 cores, speeding up the rendering time massively. Rust was built to make parallel computing easy, and ray tracing lend itself well to parallel execution. Memory safety, mutexes etc. are all taken care of by Rust, and provide a huge optimisation. When a thread has computed a colour for the pixel it is working on, it send the pixel position, colour and depth to a receiver via a queue, and the receiver picks each pixel off the queue and writes it to the framebuffer. After all the sending threads finish, the receiver thread finishes too, and the framebuffer contains the complete image.
 
-\subsection{Objects}
+\subsection{Basic Objects}
+The software supports a few different types of object. An object, no matter its type, must be able to determine if a given ray will intersect with it, and if so, where the intersection will be, what event happens at the surface (ray is reflected, absorbed or transmitted), and so on.
+
+\paragraph{Spheres} The most simple is the sphere, since the test for an intersection is easy. The parametric equation of a sphere is used, along with the ray, to determine whether there is an intersection and its position. Spheres are commonly used to showcase different materials in graphics, as they have uniform shape with varying surface normals.
+
+\paragraph{Plane} An infinite plane can be expressed as a surface normal and a point in the plane. Using the implicit equation, the intersection test is very basic geometry. The plane is useful during debugging to show the shadow of other objects, which places them in relation to on another.
+
+\paragraph{Polymesh} A polymesh is a set of primitives (triangles) that together form a model, with famous examples being the Stanford bunny, Utah teapot and Stanford dragon. The software is capable of interpreting polymeshes from files in the ``kcply'' format (as opposed to the standard .ply format) that are zero or one-indexed. Each triangle is defined as a trio of vertices if the file. The intersection testing for a polymesh is intensive and complex, as it includes smoothing by using vertex normals. In order to achieve this, normals for each triangle and vertex are computed during the creation of the object, requiring several passes through the triangles.
+
+Intersections with triangles are computed by using Barycentric coordinates and the M{\"o}ller-Trumbore intersection algorithm \cite{}. This allows the vertex normals to be combined at a location where the ray hits according the the proximity of the intersection with each vertex, producing a smooth looking object in the output. The program uses the Utah teapot data to showcase this. This intersection test is time consuming, as every single triangle must be checked for an intersection with every ray.
+
+\paragraph{Triangles} A single triangle can be used to form a plane with finite size using the same intersection algorithm as the polymesh, which is useful for when it's not worth the time to write a whole file in kcply or ply format. The triangle objects are used in the program to form the walls of a Cornell box.
 
 \subsection{Lighting}
+\paragraph{Lights}
+Lights need to be used in order to realistically colour objects and their shadows in 3D space. A light emits light in one or many directions of some given colour. The light colour will alter the the colour that appears on surface in the image.
+
+The most basic type of light is the directional light, which simulates a light source that's very far away (like the sun). The direction from any point on any surface is always the inverse of the light's direction. The problem with using a directional light is the lack of control over the light's position. A point light is a point in space that emits light equally in all directions. This is excellent for scenes such as the cornell box, where the walls and ceiling of the box would occlude a directional light from above.
+
+\paragraph{Materials}
+The appearance of an object is affected by the light that hits it interacting with its material. The material controls how metallic or glossy a surface is. One material that tends to be used for debugging that does not interect with incoming light is the normally shaded material, where the colour output depends on the surface normal. It is useful especially when developing the polymesh object, as the surface normals are easy to get wrong. During development, I often ended up with inverse normals or normals of non-unit length, and the normally shaded material makes it very easy to debug that issue.
+
+Other materials include metal, glass (dielectric), matt and combination materials. Incoming light gets reflected, transmitted or absorbed, according to the material, and for each ray fired at a material, a colour is returned. Since this process is recursive for reflective objects like metal (as the pixel colour needs to have contribution from the objects in the reflection, too), there is a maximum recursion depth. As mentioned above, in situations where a ray may reflect or refract, the outcome is determined based on probability.
+
+Diffuse (matte) surfaces scatter incoming rays in a random direction, resulting in a fairly uniform surface that is not glossy or specular. This is often called Lambertian \cite{}, and is one part of the Phong lighting model \cite{}.
 
 \section{Feature-Rich Rendering}
 \subsection{Reflection and Refraction}\label{ss:reflandrefr}
+
 
 \paragraph{Frenel Term}
 

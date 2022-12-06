@@ -4,6 +4,7 @@ use super::Material;
 use crate::{
     colour::Colour,
     hit::Hit,
+    light::point::random_in_unit_sphere,
     photonmap::Interaction,
     ray::{Ray, Reflectable},
     scene::Scene,
@@ -12,14 +13,14 @@ use crate::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct Metallic {
     colour: Colour,
-    power: f32,
+    roughness: f32,
 }
 
 impl Metallic {
-    pub fn new(specular: Colour, power: f32) -> Self {
+    pub fn new(specular: Colour, roughness: f32) -> Self {
         Metallic {
             colour: specular,
-            power,
+            roughness,
         }
     }
 }
@@ -37,7 +38,9 @@ impl Material for Metallic {
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {
-        let r = hit.incident.direction.normalize().reflect(hit.normal);
+        let r = (hit.incident.direction.normalize().reflect(hit.normal)
+            + self.roughness * random_in_unit_sphere())
+        .normalize();
         let ray = Ray::new(hit.position + 0.001 * r, r);
         Interaction::Reflected {
             ray,
