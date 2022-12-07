@@ -51,7 +51,7 @@ impl Material for Diffuse {
             r = hit.normal;
         }
         let ray = Ray::new(hit.position + 0.001 * r, r);
-        colour + scene.raytrace(ray, recurse - 1, viewer).0 * 0.5
+        colour + scene.raytrace(ray, recurse - 1, viewer).0 * 0.3
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {

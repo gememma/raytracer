@@ -4,10 +4,10 @@ use raytracer::{
     colour::Colour,
     framebuffer::FrameBuffer,
     fullcamera::FullCamera,
-    light::{directional::Directional, point::Point},
+    light::{area::Area, directional::Directional, point::Point},
     material::{
         compound::Compound, dielectric::Dielectric, diffuse::Diffuse, metallic::Metallic,
-        phong::Phong,
+        normalshading::NormalShading, phong::Phong,
     },
     object::{
         csg::{Csg, Op},
@@ -45,7 +45,7 @@ fn main() {
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
-        100,
+        30,
         0.,
     );
 
@@ -203,8 +203,24 @@ fn build_quad_scene(scene: &mut Scene) {
 fn build_c_box(scene: &mut Scene) {
     // materials
     let mat_white = Diffuse::new(Colour::from_rgb(0.8, 0.8, 0.8));
-    let mat_red = Diffuse::new(Colour::from_rgb(0.8, 0.1, 0.1));
-    let mat_green = Diffuse::new(Colour::from_rgb(0.1, 0.8, 0.1));
+    // let mat_white = Phong::new(
+    //     Colour::from_rgb(0.1, 0.1, 0.1),
+    //     Colour::from_rgb(0.6, 0.6, 0.6),
+    //     Colour::from_rgb(0.4, 0.4, 0.4),
+    //     40.,
+    // );
+    let mat_red = Phong::new(
+        Colour::from_rgb(0.2, 0., 0.),
+        Colour::from_rgb(0.4, 0., 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
+    let mat_green = Phong::new(
+        Colour::from_rgb(0., 0.2, 0.),
+        Colour::from_rgb(0., 0.4, 0.),
+        Colour::from_rgb(0.5, 0.5, 0.5),
+        40.,
+    );
     let mat_glass = Dielectric::new(1.52);
     let mut mat_combo = Compound::new();
     mat_combo.add_material(mat_red.clone());
@@ -300,9 +316,9 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 6.), 0.4);
-    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 6.), 0.4);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 6.), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
+    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
+    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
     spherem.set_material(Box::new(mat_white.clone()));
     spherer.set_material(Box::new(Metallic::new(Colour::from_rgb(0.7, 0.7, 0.7), 0.)));
@@ -312,8 +328,8 @@ fn build_c_box(scene: &mut Scene) {
 
     // lights
     scene.add_light(Point::new(
-        Vec3A::new(0., 2., 3.),
-        Colour::from_rgb(1., 1., 1.),
+        Vec3A::new(0., 2., 4.),
+        Colour::from_rgba(1., 1., 1., 0.),
     ));
 }
 

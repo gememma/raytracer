@@ -4,6 +4,7 @@ use glam::Vec3A;
 
 use crate::{colour::Colour, photonmap::Photon, Vertex};
 
+pub mod area;
 pub mod directional;
 pub mod point;
 

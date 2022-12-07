@@ -58,7 +58,7 @@ impl Scene {
     pub fn shadow_trace(&self, ray: &Ray, limit: f32) -> bool {
         for object in &self.object_list {
             if let Some(hit) = Self::select_first(object.intersection(ray)) {
-                if hit.t > 0.0000001 && hit.t < limit {
+                if hit.t > 0.00001 && hit.t < limit {
                     match hit.material.interact(&hit) {
                         Interaction::Transmitted { .. } => continue,
                         _ => return true,

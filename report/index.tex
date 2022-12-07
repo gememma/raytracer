@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=0.7in]{geometry}
+\usepackage[margin=0.8in]{geometry}
 \usepackage{graphicx}
 \usepackage{setspace}
 \usepackage{float}
@@ -10,6 +10,10 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{amsmath}
+\usepackage{xurl}
+% use biblatex for refs
+\usepackage[backend=biber]{biblatex}
+\addbibresource{refs.bib}
 % \usepackage{titlesec}
 % last package to load
 \usepackage[hidelinks]{hyperref}
@@ -42,26 +46,51 @@
 Ray tracing is a method used in computer graphics to simulate light moving through a three-dimensional scene. This report accompanies a piece of software that uses ray tracing to produce an image using the famous Utah teapot model.
 
 \subsection{Language and Libraries}
-\paragraph{Rust} The software is written in Rust \cite{}. Rust was chosen for this project because of its speed and support for multi-threading. It is also fairly similar to the more commonly-used C++, making the translation of starter code fairly simple.
+\paragraph{Rust} The software is written in Rust \cite{}. Rust was chosen for this project because of its speed and support for multi-threading. It is also fairly similar to the more commonly-used C++, making the translation of the provided starter code fairly simple.
 
-\paragraph{Glam} Glam is a library that provides types and methods for vectors, one of the foundations of graphics software. There are also types that are safe to use in parallel, perfect for ray tracing, and a type for a 3D transformations.
+\paragraph{Glam} Glam is a library that provides types and methods for vectors, one of the foundations of graphics software. There are also types that are safe to use in parallel, like \texttt{Vec3A}, perfect for ray tracing, and a type for a 3D transformations.
 
 \paragraph{png} The software writes the pixel data produced into a .png image file. The png library allows this, and is easier than writing to a .ppm file and then converting it manually, despite the simplicity of the .ppm format. The library also handles the complexity of properly adjusting the colours if the image produced is too bright or dark.
 
 \paragraph{Acap} ``As close as possible'', abbreviated to acap, is a library that provides a number of different data structures which support search by proximity, including a KD tree. The library also includes methods for balancing and searching automatically.
 
 \subsection{Structure}
-The program is separated into multiple files, grouped by the types and traits that they contain. For types that implement a trait, their files are arranges into a folder names after the trait and the trait definition is in a file directly in the ``src'' folder. For example, the trait ``Object'' is defined in `src/object.rs' and the type ``Sphere'' that implements Object is defined in `src/object/sphere.rs'. Some files, like `src/photonmap.rs', define multiple related types.
+The program is separated into multiple files, grouped by the types and traits that they contain. For types that implement a trait, their files are arranges into a folder names after the trait and the trait definition is in a file directly in the \texttt{src} folder. For example, the trait \texttt{Object} is defined in \texttt{src/object.rs} and the type \texttt{Sphere} that implements \texttt{Object} is defined in \texttt{src/object/sphere.rs}. Some files, like \texttt{src/photonmap.rs}, define multiple related types.
 
-To run the program, you must have Rust installed: go to rustup.rs/ to do so. Then the command `cargo run --package raytracer --release' may be used. The program will produce .png files as output in the root folder of the project.
+To run the program, you must have Rust installed: go to \url{https://rustup.rs/} to do so. Then the command \texttt{cargo run --package raytracer --release} may be used. The program will produce .png files as output in the root folder of the project.
 
-The file `src/main.rs' contains the main function, which initialises the frame buffer, scene and camera before rendering the scene and photon map. Finally, it calls the buffer to write its data to a file. This file also contains the function that creates the scene by specifying objects and their materials, as well as lights.
+The file \texttt{src/main.rs} contains the main function, which initialises the frame buffer, scene and camera before rendering the scene and photon map. Finally, it calls the buffer to write its data to a file. This file also contains the function that creates the scene by specifying objects and their materials, as well as lights. See a summary of the contents of each file in \texttt{src/} in Table \ref{tab:projfiles}. Files inside folders in \texttt{src/} are excluded for readability.
 
-\section{Basic Raytracer}
+% TABLE =============================================================================================================
+\begin{table}[h]
+    \centering
+    \caption{Project files in \texttt{src} folder}
+    \label{tab:projfiles}
+        \begin{tabular}{@{}l|l@{}}
+            \toprule
+            File & Contents \\ \midrule
+            main.rs & Main control of program flow and scene building \\
+            lib.rs & Project modules and Vertex type alias \\
+            colour.rs & Colour type and associated functions and operators \\
+            framebuffer.rs & FrameBuffer type and file writing functions \\ 
+            fullcamera.rs & FullCamera type and functions, including scene rendering \\
+            hit.rs & Hit struct which stores information about ray-object intersections \\
+            light.rs & Light trait definition, links to `light/' \\
+            linedrawer.rs & \textbf{[unused]} LineDrawer type and functions, used during development to debug Polymesh object \\
+            material.rs & Material trait definition, links to `material/' \\
+            object.rs &  Object trait definition, links to `object/' \\
+            photonmap.rs & PhotonMap, Photon and PhotonHit types, functions and enums, including PhotonMap creation \\
+            ray.rs & Ray type and functions and Reflectable trait \\
+            scene.rs & Scene type and functions, including querying objects for their interactions with Rays \\
+            \bottomrule
+        \end{tabular}
+\end{table}
+
+\section{Basic Ray tracer}
 \subsection{Camera}
 In order to produce an image of a scene, a camera is used. The camera may be moved and rotated, its aperture adjusted, the number of samples per pixel altered, and an image size given. The camera position serves as the origin point for the rays that are fired through the image plane and into the scene. Each ray returns a colour which contributes to the final colour of the corresponding pixel it passes through.
 
-\paragraph{Multisampling} To create a more accurate image, multiple rays (samples) are fired through each pixel, and they all contribute equally to the final colour. The rays are fired with a small element of randomness to prevent them all taking the same path. Multisampling also allows the number of rays in the scene to be controlled. Although there are a greater number of rays per pixel, rays can be reflected or refracted (Section \ref{ss:reflandrefr}) stochastically (also called ``Russian roulette'' in the context of photons) rather than ``branching'', which generates multiple new rays from an intersection. Generating multiple new rays can result in a much greater quantity of them in the scene, slowing down the runtime considerably.
+\paragraph{Multisampling} To create a more accurate image, multiple rays (samples) are fired through each pixel, and they all contribute equally to the final colour, as described in \ref{}. The rays are fired with a small element of randomness to prevent them all taking the same path. Multisampling also allows the number of rays in the scene to be controlled. Although there are a greater number of rays per pixel, rays can be reflected or refracted (Section \ref{ss:reflandrefr}) stochastically (also called ``Russian roulette'' in the context of photons) rather than ``branching'', which generates multiple new rays from an intersection. Generating multiple new rays can result in a much greater quantity of them in the scene, slowing down the runtime considerably.
 
 In addition, this technique allows for depth of field in the image (Section \ref{ss:depthoffield}).
 
@@ -85,18 +114,28 @@ Intersections with triangles are computed by using Barycentric coordinates and t
 \paragraph{Lights}
 Lights need to be used in order to realistically colour objects and their shadows in 3D space. A light emits light in one or many directions of some given colour. The light colour will alter the the colour that appears on surface in the image.
 
-The most basic type of light is the directional light, which simulates a light source that's very far away (like the sun). The direction from any point on any surface is always the inverse of the light's direction. The problem with using a directional light is the lack of control over the light's position. A point light is a point in space that emits light equally in all directions. This is excellent for scenes such as the cornell box, where the walls and ceiling of the box would occlude a directional light from above.
+The most basic type of light is the directional light, which simulates a light source that's very far away (like the sun). The direction from any point on any surface is always the inverse of the light's direction. The problem with using a directional light is the lack of control over the light's position. A point light is a point in space that emits light equally in all directions. This is excellent for scenes such as the Cornell box, where the walls and ceiling of the box would occlude a directional light from above.
+
+The traditional Cornell box uses an area light, which is yet mor realistic that the point light. However, using an area light incurs significant computational cost, and is out of the scope of this project.
 
 \paragraph{Materials}
-The appearance of an object is affected by the light that hits it interacting with its material. The material controls how metallic or glossy a surface is. One material that tends to be used for debugging that does not interect with incoming light is the normally shaded material, where the colour output depends on the surface normal. It is useful especially when developing the polymesh object, as the surface normals are easy to get wrong. During development, I often ended up with inverse normals or normals of non-unit length, and the normally shaded material makes it very easy to debug that issue.
+The appearance of an object is affected by the light that hits it interacting with its material. The material controls how metallic or glossy a surface is. One material that tends to be used for debugging that does not interact with incoming light is the normally shaded material, where the colour output depends on the surface normal. It is useful especially when developing the polymesh object, as the surface normals are easy to get wrong. During development, I often ended up with inverse normals or normals of non-unit length, and the normally shaded material makes it very easy to debug that issue.
 
-Other materials include metal, glass (dielectric), matt and combination materials. Incoming light gets reflected, transmitted or absorbed, according to the material, and for each ray fired at a material, a colour is returned. Since this process is recursive for reflective objects like metal (as the pixel colour needs to have contribution from the objects in the reflection, too), there is a maximum recursion depth. As mentioned above, in situations where a ray may reflect or refract, the outcome is determined based on probability.
+Other materials include metal, glass (dielectric), matt and combination materials. Incoming light gets reflected, transmitted or absorbed, according to the material, and for each ray fired at a material, a colour is returned. Since this process is recursive for reflective objects like metal (as the pixel colour needs to have contribution from the objects in the reflection, too), there is a maximum recursion depth. As mentioned above, in situations where a ray may reflect or refract, the outcome is determined based on probability. Reflection and refraction and not features of the basic ray tracer and are discussed in Section \ref{ss:reflandrefr}.
 
-Diffuse (matte) surfaces scatter incoming rays in a random direction, resulting in a fairly uniform surface that is not glossy or specular. This is often called Lambertian \cite{}, and is one part of the Phong lighting model \cite{}.
+Diffuse (matte) surfaces scatter incoming rays in a random direction, resulting in a fairly uniform surface that is not glossy or specular. This is often called Lambertian \cite{}, and is one part of the Phong lighting model \cite{}. The Phong material was developed to approximate light more accurately than previously available by combining three terms: ambient, diffuse and specular. The result is a plastic-like material that shows the form of the object. The ambient term is the darkest colour, and applies to the entire object. The diffuse term provides the mid-tone, depending on the location of the light sources. The specular term depends on the position of the camera (viewer) in relation to the surface, and is the brightest term. The Phong lighting model may look unrealistic by modern standards, but was groundbreaking in its time.
 
 \section{Feature-Rich Rendering}
 \subsection{Reflection and Refraction}\label{ss:reflandrefr}
+Reflection and refraction occur when a ray hits a material that is metallic or dielectric (glass-like). Reflection occurs when a ray hits a reflective surface, at which point a new ray is created from the hit point in the reflected direction about the surface normal. If that ray hits another reflective surface it may spawn yet another new ray until the recursion depth is reached (to prevent infinite ray bouncing). If the ray hit a diffuse surface, the surface colour contributes to the initial hit (as if an object is in a mirror). For a metallic material, all rays are reflected, but the direction may be affected by the \texttt{roughness} field. The rougher the material, the more the direction of the reflected ray is altered by randomness. This is seen  in the \texttt{interact()} function on \texttt{Metallic}:
 
+\begin{minted}{Rust}
+    let r = (hit.incident.direction.normalize().reflect(hit.normal)
+            + self.roughness * random_in_unit_sphere())
+        .normalize();
+\end{minted}
+
+Refraction occurs according to Snell's Law : the angle of a light ray changes when crossing the boundary between media with different refractive indices. Snell's Law is given by: $\frac{\sin \theta_{1}}{\sin \theta_{2}} = \frac{n_{1}}{n_{2}}$ where $\theta$ is the angle of incidence and $n$ is the refractive index of the material
 
 \paragraph{Frenel Term}
 
@@ -111,12 +150,17 @@ The ``Thin Lens'' model makes some generalisations about the physics of a real l
 The offset of rays by some amount within the lens disc is achieved by generating a random vector within a unit disc and multiplying it by the camera's aperture. The direction of the ray also needs to be adjusted, otherwise it will not point exactly to the correct pixel, and objects that should be in focus would appear blurry.
 
 \section{Photon Mapping}
-\subsection{Theory}
-
-\paragraph{Colour Bleeding}
+\subsection{Photon Generation}
 
 \subsection{Photon Map}
 
-\subsection{Materials}
+\paragraph{Caustics}
 
+\subsection{Rendering}
+
+\pagebreak
+\printbibliography
+\pagebreak
+\appendix
+\section{Images}
 \end{document}
