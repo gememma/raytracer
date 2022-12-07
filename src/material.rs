@@ -4,7 +4,6 @@ use glam::Vec3A;
 
 use crate::{colour::Colour, hit::Hit, photonmap::Interaction, scene::Scene};
 
-pub mod compound;
 pub mod dielectric;
 pub mod diffuse;
 pub mod metallic;

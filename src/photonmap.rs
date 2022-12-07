@@ -35,7 +35,7 @@ impl PhotonMap {
 
         // direct hits
         for light in &scene.light_list {
-            for _ in 0..5000 {
+            for _ in 0..50000 {
                 let mut p = light.generate_photon();
                 let mut depth = 5;
                 'l: while let Some((ph, h)) = Self::photon_trace(scene, p) {
@@ -86,7 +86,9 @@ impl PhotonMap {
     }
 
     pub fn visualise(&self, pos: Vertex) -> (Colour, usize) {
-        let nearest = self.tree.k_nearest_within(&[pos.x, pos.y, pos.z], 1000, 1.);
+        let nearest = self
+            .tree
+            .k_nearest_within(&[pos.x, pos.y, pos.z], 1000, 0.5);
         let mut colour = Colour::default();
         let n = nearest.len();
         for hit in nearest {
