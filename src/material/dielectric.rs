@@ -5,7 +5,7 @@ use crate::{
     colour::Colour,
     hit::Hit,
     material::Material,
-    photonmap::Interaction,
+    photonmap::{Interaction, PhotonMap},
     ray::{Ray, Reflectable},
     scene::Scene,
 };
@@ -37,12 +37,19 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour {
+    fn compute(
+        &self,
+        viewer: Vec3A,
+        hit: &Hit,
+        recurse: usize,
+        scene: &Scene,
+        pmap: &PhotonMap,
+    ) -> Colour {
         let event = self.interact(hit);
         if let Interaction::Transmitted { ray, attenuation } = event {
-            scene.raytrace(ray, recurse - 1, viewer).0
+            scene.raytrace(ray, recurse - 1, viewer, pmap).0
         } else if let Interaction::Reflected { ray, attenuation } = event {
-            scene.raytrace(ray, recurse - 1, viewer).0
+            scene.raytrace(ray, recurse - 1, viewer, pmap).0
         } else {
             unreachable!()
         }

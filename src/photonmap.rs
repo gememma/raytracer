@@ -1,14 +1,14 @@
 use acap::{kd::KdTree, Coordinates, Euclidean, EuclideanDistance, NearestNeighbors, Proximity};
 
-use crate::{colour::Colour, hit::Hit, ray::Ray, scene::Scene, Vertex};
+use crate::{colour::Colour, hit::Hit, material::Material, ray::Ray, scene::Scene, Vertex};
 
-pub struct PhotonMap {
-    tree: KdTree<PhotonHit>,
+pub struct PhotonMap<'a> {
+    tree: KdTree<PhotonHit<'a>>,
 }
 
-pub struct PhotonHit {
+pub struct PhotonHit<'a> {
     photon: Photon,
-    position: Vertex,
+    hit: Hit<'a>,
 }
 
 pub struct Photon {
@@ -17,6 +17,7 @@ pub struct Photon {
     pub type_: Type,
 }
 
+#[derive(Eq, PartialEq)]
 pub enum Type {
     Direct,
     Indirect,
@@ -29,17 +30,35 @@ pub enum Interaction {
     Absorbed,
 }
 
-impl PhotonMap {
-    pub fn build(scene: &Scene) -> Self {
+impl<'a> PhotonMap<'a> {
+    pub fn build(scene: &'a Scene) -> Self {
         let mut tree = KdTree::new();
+        let photon_number = 50000;
 
-        // direct hits
         for light in &scene.light_list {
-            for _ in 0..50000 {
+            for _ in 0..photon_number {
                 let mut p = light.generate_photon();
                 let mut depth = 5;
-                'l: while let Some((ph, h)) = Self::photon_trace(scene, p) {
+                'l: while let Some(ph) = Self::photon_trace(scene, p) {
                     let c = ph.photon.colour;
+                    if ph.photon.type_ == Type::Direct {
+                        // fire shadow photon
+                        if let Some(ph) = Self::shadow_photon_trace(
+                            scene,
+                            Photon {
+                                ray: Ray::new(
+                                    ph.hit.position + 0.0001 * ph.hit.incident.direction,
+                                    ph.hit.incident.direction,
+                                ),
+                                colour: Colour::from_rgb(0., 0., 0.),
+                                type_: Type::Shadow,
+                            },
+                        ) {
+                            tree.push(ph);
+                        }
+                    }
+
+                    let hit = ph.hit.clone();
                     tree.push(ph);
 
                     if depth < 1 {
@@ -48,7 +67,7 @@ impl PhotonMap {
                         depth -= 1;
                     }
 
-                    match h.material.interact(&h) {
+                    match hit.material.interact(&hit) {
                         Interaction::Reflected { ray, attenuation }
                         | Interaction::Transmitted { ray, attenuation } => {
                             p = Photon {
@@ -65,30 +84,108 @@ impl PhotonMap {
             }
         }
 
-        // indirect and shadow hits
         tree.balance();
         PhotonMap { tree }
     }
 
-    pub fn photon_trace<'a>(scene: &'a Scene, photon: Photon) -> Option<(PhotonHit, Hit<'a>)> {
-        // indirect and shadow photons
+    pub fn build_caustics(scene: &'a Scene) -> Self {
+        // build a photon map for caustics by firing lots of photons at metals and glass
+        let mut tree = KdTree::new();
+        let photon_number = 150000;
+
+        for light in &scene.light_list {
+            for _ in 0..photon_number {
+                let mut p = light.generate_photon();
+                let mut depth = 5;
+
+                'l: while let Some(ph) = Self::photon_trace(scene, p) {
+                    let c = ph.photon.colour;
+                    let hit = ph.hit.clone();
+
+                    // discard absorbed direct hits for caustics
+                    if ph.photon.type_ == Type::Direct {
+                        match ph.hit.material.interact(&ph.hit) {
+                            Interaction::Transmitted { ray, attenuation } => {
+                                tree.push(ph);
+                            }
+                            Interaction::Reflected { .. } | Interaction::Absorbed => {
+                                break 'l;
+                            }
+                        }
+                    } else {
+                        tree.push(ph);
+                    }
+
+                    if depth < 1 {
+                        break 'l;
+                    } else {
+                        depth -= 1;
+                    }
+
+                    match hit.material.interact(&hit) {
+                        Interaction::Transmitted { ray, attenuation } => {
+                            p = Photon {
+                                ray,
+                                colour: attenuation * c,
+                                type_: Type::Indirect,
+                            }
+                        }
+                        Interaction::Reflected { .. } | Interaction::Absorbed => {
+                            break 'l;
+                        }
+                    }
+                }
+            }
+        }
+
+        tree.balance();
+        PhotonMap { tree }
+    }
+
+    pub fn photon_trace(scene: &'a Scene, photon: Photon) -> Option<PhotonHit<'a>> {
+        // indirect photons
         if let Some(h) = scene.trace(&photon.ray) {
-            Some((
-                PhotonHit {
+            Some(PhotonHit {
+                photon: photon,
+                hit: h,
+            })
+        } else {
+            None
+        }
+    }
+
+    pub fn shadow_photon_trace(scene: &'a Scene, photon: Photon) -> Option<PhotonHit<'a>> {
+        // shadow photons
+        if let Some(h) = scene.trace(&photon.ray) {
+            if h.entering {
+                Some(PhotonHit {
                     photon: photon,
-                    position: h.position,
-                },
-                h,
-            ))
+                    hit: h,
+                })
+            } else {
+                PhotonMap::shadow_photon_trace(
+                    scene,
+                    Photon {
+                        ray: Ray::new(
+                            h.position + 0.0001 * h.incident.direction,
+                            h.incident.direction,
+                        ),
+                        colour: photon.colour,
+                        type_: photon.type_,
+                    },
+                )
+            }
         } else {
             None
         }
     }
 
     pub fn visualise(&self, pos: Vertex) -> (Colour, usize) {
+        let neighbours = 1000;
+        let radius = 0.5;
         let nearest = self
             .tree
-            .k_nearest_within(&[pos.x, pos.y, pos.z], 1000, 0.5);
+            .k_nearest_within(&[pos.x, pos.y, pos.z], neighbours, radius);
         let mut colour = Colour::default();
         let n = nearest.len();
         for hit in nearest {
@@ -96,9 +193,33 @@ impl PhotonMap {
         }
         (colour, n)
     }
+
+    pub fn visualise_caustics(&self, pos: Vertex) -> (Colour, usize) {
+        let neighbours = 1000;
+        let radius = 0.5;
+        let nearest = self
+            .tree
+            .k_nearest_within(&[pos.x, pos.y, pos.z], neighbours, radius);
+        let mut colour = Colour::default();
+        let mut n = 0;
+        for hit in nearest {
+            match hit.item.hit.material.interact(&hit.item.hit) {
+                Interaction::Reflected { .. } | Interaction::Transmitted { .. } => {}
+                Interaction::Absorbed => {
+                    n += 1;
+                    colour += hit.item.photon.colour;
+                }
+            }
+        }
+        (colour / n as f32, n)
+    }
+
+    pub fn get_radiance_est(&self, h: Hit) -> (Colour) {
+        todo!()
+    }
 }
 
-impl Coordinates for PhotonHit {
+impl<'a> Coordinates for PhotonHit<'a> {
     type Value = f32;
 
     fn dims(&self) -> usize {
@@ -107,18 +228,18 @@ impl Coordinates for PhotonHit {
 
     fn coord(&self, i: usize) -> Self::Value {
         match i {
-            0 => self.position.x,
-            1 => self.position.y,
-            2 => self.position.z,
+            0 => self.hit.position.x,
+            1 => self.hit.position.y,
+            2 => self.hit.position.z,
             _ => unreachable!(),
         }
     }
 }
 
-impl Proximity<PhotonHit> for [f32; 3] {
+impl<'a> Proximity<PhotonHit<'a>> for [f32; 3] {
     type Distance = EuclideanDistance<f32>;
 
     fn distance(&self, other: &PhotonHit) -> Self::Distance {
-        Euclidean::new(*self).distance(&Euclidean::new(other.position.to_array()))
+        Euclidean::new(*self).distance(&Euclidean::new(other.hit.position.to_array()))
     }
 }

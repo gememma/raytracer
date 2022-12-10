@@ -12,7 +12,7 @@ pub mod sphere;
 pub mod triangle;
 
 pub trait Object: Debug {
-    fn set_material(&mut self, material: Box<dyn Material>);
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>);
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit>;
 

@@ -12,7 +12,7 @@ use crate::{
 pub struct Plane {
     normal: Vec3A,
     pos: Vertex,
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl Plane {
@@ -26,7 +26,7 @@ impl Plane {
 }
 
 impl Object for Plane {
-    fn set_material(&mut self, material: Box<dyn Material>) {
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
         self.material = material;
     }
 

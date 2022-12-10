@@ -54,6 +54,10 @@ impl Colour {
         self.g += adjust.g;
         self.b += adjust.b;
     }
+
+    pub fn is_nan(&self) -> bool {
+        self.r.is_nan() || self.g.is_nan() || self.b.is_nan()
+    }
 }
 
 impl Mul<&Colour> for Colour {

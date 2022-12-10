@@ -10,7 +10,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Quadratic {
     coeffs: [f32; 10],
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl Quadratic {
@@ -34,7 +34,7 @@ impl Quadratic {
 }
 
 impl Object for Quadratic {
-    fn set_material(&mut self, material: Box<dyn Material>) {
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
         self.material = material;
     }
 

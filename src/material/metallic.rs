@@ -5,7 +5,7 @@ use crate::{
     colour::Colour,
     hit::Hit,
     light::point::random_in_unit_sphere,
-    photonmap::Interaction,
+    photonmap::{Interaction, PhotonMap},
     ray::{Ray, Reflectable},
     scene::Scene,
 };
@@ -26,12 +26,19 @@ impl Metallic {
 }
 
 impl Material for Metallic {
-    fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour {
+    fn compute(
+        &self,
+        viewer: Vec3A,
+        hit: &Hit,
+        recurse: usize,
+        scene: &Scene,
+        pmap: &PhotonMap,
+    ) -> Colour {
         if recurse < 1 {
             return Colour::default();
         }
         if let Interaction::Reflected { ray, attenuation } = self.interact(hit) {
-            attenuation * scene.raytrace(ray, recurse - 1, viewer).0
+            attenuation * scene.raytrace(ray, recurse - 1, viewer, pmap).0
         } else {
             unreachable!()
         }

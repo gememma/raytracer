@@ -5,7 +5,7 @@ use super::Material;
 use crate::{
     colour::Colour,
     hit::Hit,
-    photonmap::Interaction,
+    photonmap::{Interaction, PhotonMap},
     ray::{Ray, Reflectable},
     scene::Scene,
 };
@@ -43,7 +43,14 @@ impl Phong {
 }
 
 impl Material for Phong {
-    fn compute(&self, viewer: Vec3A, hit: &Hit, _recurse: usize, scene: &Scene) -> Colour {
+    fn compute(
+        &self,
+        viewer: Vec3A,
+        hit: &Hit,
+        _recurse: usize,
+        scene: &Scene,
+        pmap: &PhotonMap,
+    ) -> Colour {
         let ambient_intensity = 0.3;
         let mut colour = self.ambient * ambient_intensity;
 

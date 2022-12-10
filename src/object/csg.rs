@@ -66,9 +66,7 @@ where
 }
 
 impl Object for Csg {
-    fn set_material(&mut self, _material: Box<dyn Material>) {
-        // CSG does not have a material
-    }
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {}
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         match self {

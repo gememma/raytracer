@@ -32,7 +32,7 @@ pub struct IntermediateTriangle {
 pub struct PolyMesh {
     pub triangles: Vec<MeshTriangle>,
     pub smoothing: bool,
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl PolyMesh {
@@ -133,7 +133,7 @@ impl PolyMesh {
 }
 
 impl Object for PolyMesh {
-    fn set_material(&mut self, material: Box<dyn Material>) {
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
         self.material = material;
     }
 

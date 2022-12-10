@@ -1,5 +1,10 @@
 use crate::{
-    colour::Colour, hit::Hit, light::Light, object::Object, photonmap::Interaction, ray::Ray,
+    colour::Colour,
+    hit::Hit,
+    light::Light,
+    object::Object,
+    photonmap::{Interaction, PhotonMap},
+    ray::Ray,
     Vertex,
 };
 
@@ -69,7 +74,13 @@ impl Scene {
         return false;
     }
 
-    pub fn raytrace(&self, ray: Ray, recurse: usize, viewer: Vertex) -> (Colour, f32) {
+    pub fn raytrace(
+        &self,
+        ray: Ray,
+        recurse: usize,
+        viewer: Vertex,
+        pmap: &PhotonMap,
+    ) -> (Colour, f32) {
         if recurse == 0 {
             return (Colour::from_rgba(0., 0., 0., 1.), 0.);
         }
@@ -78,7 +89,10 @@ impl Scene {
 
         if let Some(best) = best_hit {
             let viewer = (viewer - best.position).normalize();
-            (best.material.compute(viewer, &best, recurse, self), best.t)
+            (
+                best.material.compute(viewer, &best, recurse, self, pmap),
+                best.t,
+            )
         } else {
             // background colour
             (Colour::from_rgba(0., 0., 0., 1.), 0.)

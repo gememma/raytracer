@@ -12,7 +12,7 @@ use crate::{
 pub struct Triangle {
     pub normal: Vec3A,
     pub corners: [Vertex; 3],
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl Triangle {
@@ -28,7 +28,7 @@ impl Triangle {
     }
     pub fn new_with_material(
         corners @ [v0, v1, v2]: [Vertex; 3],
-        material: Box<dyn Material>,
+        material: Box<dyn Material + Send + Sync>,
     ) -> Self {
         let e1 = v1 - v0;
         let e2 = v2 - v0;
@@ -42,7 +42,7 @@ impl Triangle {
 }
 
 impl Object for Triangle {
-    fn set_material(&mut self, material: Box<dyn Material>) {
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
         self.material = material;
     }
 

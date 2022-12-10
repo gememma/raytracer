@@ -12,7 +12,7 @@ use crate::{
 pub struct Sphere {
     center: Vertex,
     radius: f32,
-    material: Box<dyn Material>,
+    material: Box<dyn Material + Send + Sync>,
 }
 
 impl Sphere {
@@ -26,7 +26,7 @@ impl Sphere {
 }
 
 impl Object for Sphere {
-    fn set_material(&mut self, material: Box<dyn Material>) {
+    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
         self.material = material;
     }
 

@@ -77,7 +77,7 @@ impl FullCamera {
                 .normalize(),
         )
     }
-    pub fn render(&self, env: &Scene, fb: &mut FrameBuffer) {
+    pub fn render(&self, env: &Scene, fb: &mut FrameBuffer, pmap: &PhotonMap) {
         // This method spawns threads that raytrace in parallel for speed
         thread::scope(|s| {
             let (tx, rx) = channel();
@@ -96,7 +96,8 @@ impl FullCamera {
                             let mut depth = 0.;
                             for _ in 0..self.samples {
                                 let ray = self.get_ray_pixel(x, y);
-                                let (colourtmp, depthtmp) = env.raytrace(ray, 5, self.position);
+                                let (colourtmp, depthtmp) =
+                                    env.raytrace(ray, 5, self.position, pmap);
                                 colour += colourtmp / self.samples as f32;
                                 depth += depthtmp / self.samples as f32;
                             }
@@ -132,7 +133,7 @@ impl FullCamera {
                             for _ in 0..self.samples {
                                 let ray = self.get_ray_pixel(x, y);
                                 if let Some(best_hit) = env.trace(&ray) {
-                                    let (colourtmp, n) = map.visualise(best_hit.position);
+                                    let (colourtmp, n) = map.visualise_caustics(best_hit.position);
                                     colour += colourtmp / self.samples as f32 * n as f32;
                                     max_n = max_n.max(n);
                                 }

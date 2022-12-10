@@ -2,8 +2,13 @@ use glam::Vec3A;
 use rand::{random, Rng};
 
 use crate::{
-    colour::Colour, hit::Hit, light::point::random_in_unit_sphere, material::Material,
-    photonmap::Interaction, ray::Ray, scene::Scene,
+    colour::Colour,
+    hit::Hit,
+    light::point::random_in_unit_sphere,
+    material::Material,
+    photonmap::{Interaction, PhotonMap},
+    ray::Ray,
+    scene::Scene,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,7 +23,14 @@ impl Diffuse {
 }
 
 impl Material for Diffuse {
-    fn compute(&self, viewer: Vec3A, hit: &Hit, recurse: usize, scene: &Scene) -> Colour {
+    fn compute(
+        &self,
+        viewer: Vec3A,
+        hit: &Hit,
+        recurse: usize,
+        scene: &Scene,
+        pmap: &PhotonMap,
+    ) -> Colour {
         if recurse < 1 {
             return Colour::default();
         }
@@ -51,7 +63,7 @@ impl Material for Diffuse {
             r = hit.normal;
         }
         let ray = Ray::new(hit.position + 0.001 * r, r);
-        colour + scene.raytrace(ray, recurse - 1, viewer).0 * 0.3
+        colour + scene.raytrace(ray, recurse - 1, viewer, pmap).0 * 0.3
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {

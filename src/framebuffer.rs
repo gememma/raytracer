@@ -6,7 +6,7 @@ use std::{
 
 use png::{BitDepth, ColorType, Encoder, ScaledFloat};
 
-use crate::colour::Colour;
+use crate::{colour::Colour, photonmap::PhotonMap};
 
 #[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Pixel {
@@ -45,6 +45,23 @@ impl FrameBuffer {
     }
     pub fn get_depth(&self, x: usize, y: usize) -> f32 {
         self.buf[y * self.width + x].depth
+    }
+
+    pub fn add_caustics(&mut self, pmap: &FrameBuffer) -> FrameBuffer {
+        let mut new_fb = FrameBuffer::new(self.width, self.height);
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let mut colour = if !pmap.get_pixel(x, y).is_nan() {
+                    self.get_pixel(x, y) + pmap.get_pixel(x, y)
+                } else {
+                    self.get_pixel(x, y)
+                };
+
+                new_fb.plot_pixel(x, y, colour.r, colour.g, colour.b);
+                new_fb.plot_depth(x, y, self.get_depth(x, y));
+            }
+        }
+        new_fb
     }
 
     pub fn write_rgb_png(&self, filename: &str) -> io::Result<()> {

@@ -33,9 +33,9 @@ fn main() {
 
     // Setup the scene
     // build_scene(&mut scene);
-    build_c_box(&mut scene);
+    // build_c_box(&mut scene);
     // build_quad_scene(&mut scene);
-    // build_csg_scene(&mut scene);
+    build_csg_scene(&mut scene);
 
     // Declare a camera
     let camera = FullCamera::new(
@@ -50,9 +50,10 @@ fn main() {
     );
 
     // Camera generates rays for each pixel in the framebuffer and records colour + depth.
-    let pmap = PhotonMap::build(&scene);
-    camera.render(&scene, &mut fb);
+    let pmap = PhotonMap::build_caustics(&scene);
+    camera.render(&scene, &mut fb, &pmap);
     camera.visualise_photons(&pmap, &scene, &mut photons_fb);
+    fb = fb.add_caustics(&photons_fb);
 
     // Output the framebuffer colour and depth as two images
     fb.write_rgb_png("test.png")
@@ -176,25 +177,14 @@ fn build_quad_scene(scene: &mut Scene) {
     ));
 
     // quad surface
-    let mut q = Quadratic::new(1., 0., 0., 0., 1., 0., 0., 1., 0., -0.4);
-    q.apply_transform(Affine3A::from_translation(Vec3::new(1., -1., -4.)));
-    // q.set_material(Box::new(mat_glass.clone()));
-    q.set_material(Box::new(Metallic::new(Colour::from_rgb(0.6, 0.6, 0.6), 0.)));
-    // q.set_material(Box::new(Phong::new(
-    //     Colour::from_rgb(0.1, 0.1, 0.1),
-    //     Colour::from_rgb(0.6, 0.6, 0.6),
-    //     Colour::from_rgb(0.4, 0.4, 0.4),
-    //     40.,
-    // )));
+    let mut q = Quadratic::new(1., 0.5, 0.2, 0., 3., 0., 0.2, 1., -0.1, -0.6);
+    q.apply_transform(Affine3A::from_translation(Vec3::new(0., 0.5, -5.)));
+    q.set_material(Box::new(Metallic::new(Colour::from_rgb(0.9, 0.9, 0.9), 0.)));
     scene.add_object(q);
-
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 4.), 0.4);
-    spherer.set_material(Box::new(mat_glass.clone()));
-    scene.add_object(spherer);
 
     // lighting
     scene.add_light(Point::new(
-        Vec3A::new(0., 2., 1.),
+        Vec3A::new(0., 2.5, 1.),
         Colour::from_rgba(1., 1., 1., 0.),
     ));
 }
@@ -598,16 +588,16 @@ fn build_csg_scene(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherem2 = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.8);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
-    let mut q = Sphere::new(Vec3A::new(0., -0.2, 5.), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(0., -1., 6.5), 0.8);
+    // let mut spherer = Sphere::new(Vec3A::new(0.3, -0.5, 5.), 0.6);
+    // let mut q = Sphere::new(Vec3A::new(0., -0.2, 5.), 0.4);
 
-    q.set_material(Box::new(mat_red.clone()));
-    spherer.set_material(Box::new(mat_red.clone()));
-    spherem2.set_material(Box::new(mat_red.clone()));
+    // q.set_material(Box::new(mat_red.clone()));
+    // spherer.set_material(Box::new(mat_glass.clone()));
+    spherel.set_material(Box::new(mat_glass.clone()));
     // create csgs
-    let node1 = Csg::new_branch(spherer, spherem2, Op::Difference);
-    scene.add_object(node1);
+    // let node1 = Csg::new_branch(spherer, spherel, Op::Difference);
+    scene.add_object(spherel);
     // scene.add_object(Csg::new_branch(node1, q, Op::Difference));
 
     // lights
