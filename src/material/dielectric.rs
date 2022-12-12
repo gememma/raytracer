@@ -25,7 +25,7 @@ impl Dielectric {
             .dot(hit.normal)
             .min(1.);
         let ref_perp = ratio * (hit.incident.direction.normalize() + cos_theta * hit.normal);
-        let ref_para = -(1. - ref_perp.length_squared()).abs().sqrt() * hit.normal;
+        let ref_para = -((1. - ref_perp.length_squared()).abs()).sqrt() * hit.normal;
         ref_perp + ref_para
     }
 

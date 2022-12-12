@@ -169,12 +169,15 @@ impl Object for PolyMesh {
             if t > epsilon {
                 // successful ray intersection
                 let w = 1. - u - v;
-                let plane_normal = if self.smoothing {
+                let mut plane_normal = if self.smoothing {
                     c0.normal * w + c1.normal * u + c2.normal * v
                 } else {
                     -e1.cross(e2)
                 };
                 let entering = plane_normal.dot(ray.direction) < 0.;
+                if !entering {
+                    plane_normal = -plane_normal
+                }
                 let h = Hit {
                     t,
                     entering,
