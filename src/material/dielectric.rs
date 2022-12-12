@@ -13,14 +13,19 @@ use crate::{
 #[derive(Clone, Debug, PartialEq)]
 pub struct Dielectric {
     refractive_index: f32,
+    colour: Colour,
 }
 
 impl Dielectric {
-    pub fn new(refractive_index: f32) -> Self {
-        Dielectric { refractive_index }
+    pub fn new(refractive_index: f32, colour: Colour) -> Self {
+        Dielectric {
+            refractive_index,
+            colour,
+        }
     }
 
     fn refract(hit: &Hit, ratio: f32) -> Vec3A {
+        // calculate direction of a refracted ray
         let cos_theta = (-hit.incident.direction.normalize())
             .dot(hit.normal)
             .min(1.);
@@ -47,9 +52,9 @@ impl Material for Dielectric {
     ) -> Colour {
         let event = self.interact(hit);
         if let Interaction::Transmitted { ray, attenuation } = event {
-            scene.raytrace(ray, recurse - 1, viewer, pmap).0
+            scene.raytrace(ray, recurse - 1, viewer, pmap).0 * attenuation
         } else if let Interaction::Reflected { ray, attenuation } = event {
-            scene.raytrace(ray, recurse - 1, viewer, pmap).0
+            scene.raytrace(ray, recurse - 1, viewer, pmap).0 * attenuation
         } else {
             unreachable!()
         }
@@ -71,14 +76,14 @@ impl Material for Dielectric {
             let ray = Ray::new(hit.position + 0.001 * r, r);
             Interaction::Transmitted {
                 ray,
-                attenuation: Colour::from_rgb(1., 1., 1.),
+                attenuation: self.colour,
             }
         } else {
             let r = hit.incident.direction.reflect(hit.normal);
             let ray = Ray::new(hit.position + 0.001 * r, r);
             Interaction::Reflected {
                 ray,
-                attenuation: Colour::from_rgb(1., 1., 1.),
+                attenuation: self.colour,
             }
         }
     }

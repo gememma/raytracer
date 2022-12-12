@@ -49,14 +49,14 @@ fn main() {
         0.,
     );
 
-    // build caustics map
+    // build caustics map WARNING: SLOW
     // let caustic_pmap = PhotonMap::build_caustics(&scene);
 
     // camera generates rays for each pixel in the framebuffer and records colour + depth.
     let pmap = PhotonMap::build(&scene);
     camera.render(&scene, &mut fb, &pmap);
 
-    // build the visualisation for the photon map for debugging
+    // build the visualisation for the photon map for debugging WARNING: SLOW
     // camera.visualise_photons(&pmap, &scene, &mut photons_fb);
 
     // add the caustics map to the frame buffer
@@ -94,7 +94,7 @@ fn build_c_box(scene: &mut Scene) {
         Colour::from_rgb(0.5, 0.5, 0.5),
         40.,
     );
-    let mat_glass = Dielectric::new(1.52);
+    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 1., 1.));
 
     // floor
     scene.add_object(Triangle::new_with_material(
@@ -214,10 +214,11 @@ fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
 }
 
 fn build_scene(scene: &mut Scene) {
+    // creat materials
     let mat_white = Diffuse::new(Colour::from_rgb(0.6, 0.6, 0.6));
-    let mat_red = Diffuse::new(Colour::from_rgb(0.4, 0., 0.));
-    let mat_green = Diffuse::new(Colour::from_rgb(0., 0.64, 0.));
-    let mat_glass = Dielectric::new(1.52);
+    let mat_red = Diffuse::new(Colour::from_rgb(0.6, 0., 0.));
+    let mat_green = Diffuse::new(Colour::from_rgb(0., 0.6, 0.));
+    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 0.9, 0.8));
 
     // create teapot
     let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
