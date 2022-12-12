@@ -1,4 +1,4 @@
-use glam::{Affine3A, Vec3A};
+use glam::{Affine3A, Vec3, Vec3A};
 use rand::Rng;
 use raytracer::{
     colour::Colour,
@@ -154,18 +154,30 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
-    let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
-    let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
-    spherel.set_material(Box::new(mat_glass.clone()));
-    spherem.set_material(Box::new(mat_white.clone()));
-    spherer.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        40.,
-    )));
-    scene.add_object(spherel);
-    scene.add_object(spherem);
-    scene.add_object(spherer);
+    // let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
+    // let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
+    // let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
+    // spherel.set_material(Box::new(mat_glass.clone()));
+    // spherem.set_material(Box::new(mat_white.clone()));
+    // spherer.set_material(Box::new(Metallic::new(
+    //     Colour::from_rgb(0.6, 0.6, 0.6),
+    //     40.,
+    // )));
+    // scene.add_object(spherel);
+    // scene.add_object(spherem);
+    // scene.add_object(spherer);
+
+    // create teapot
+    let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
+    pm.apply_transform(Affine3A::from_scale(Vec3::new(0.6, 0.6, 0.6)));
+    pm.apply_transform(Affine3A::from_cols(
+        Vec3A::new(1., 0., 0.),
+        Vec3A::new(0., 0., 1.),
+        Vec3A::new(0., 1., 0.),
+        Vec3A::new(0., -2., 5.),
+    ));
+    pm.set_material(Box::new(Dielectric::new(1.52)));
+    scene.add_object(pm);
 
     // lights
     scene.add_light(Point::new(

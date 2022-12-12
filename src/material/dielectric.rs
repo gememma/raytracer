@@ -24,7 +24,7 @@ impl Dielectric {
             .dot(hit.normal)
             .min(1.);
         let ref_perp = ratio * (hit.incident.direction.normalize() + cos_theta * hit.normal);
-        let ref_para = -(1. - ref_perp.length_squared()).abs().sqrt() * hit.normal;
+        let ref_para = -((1. - ref_perp.length_squared()).abs()).sqrt() * hit.normal;
         ref_perp + ref_para
     }
 
@@ -51,16 +51,28 @@ impl Material for Dielectric {
         if ratio * sin_theta > 1. {
             // cannot refract, total internal reflection occurs
             scene
-                .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
+                .raytrace(
+                    Ray::new(hit.position + 0.001 * r, r),
+                    recurse - 1,
+                    Vec3A::default(),
+                )
                 .0
         } else {
             let r1 = Dielectric::refract(hit, ratio);
             (scene
-                .raytrace(Ray::new(hit.position + 0.001 * r, r), recurse - 1, viewer)
+                .raytrace(
+                    Ray::new(hit.position + 0.001 * r, r),
+                    recurse - 1,
+                    Vec3A::default(),
+                )
                 .0
                 * refl_probability)
                 + (scene
-                    .raytrace(Ray::new(hit.position + 0.001 * r1, r1), recurse - 1, viewer)
+                    .raytrace(
+                        Ray::new(hit.position + 0.001 * r1, r1),
+                        recurse - 1,
+                        Vec3A::default(),
+                    )
                     .0
                     * (1. - refl_probability))
         }
