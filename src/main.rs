@@ -186,7 +186,7 @@ fn build_c_box(scene: &mut Scene) {
         Box::new(mat_white.clone()),
     ));
 
-    let mut spherel = Sphere::new(Vec3A::new(-0.8, -0.5, 5.), 0.4);
+    let mut spherel = Sphere::new(Vec3A::new(0., -0.4, 3.5), 0.4);
     let mut spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4);
     let mut spherer = Sphere::new(Vec3A::new(0.8, -0.5, 5.), 0.4);
     spherel.set_material(Box::new(mat_glass.clone()));
@@ -364,7 +364,7 @@ fn build_scene(scene: &mut Scene) {
 
     // create point light
     scene.add_light(Point::new(
-        Vec3A::new(0., 1., 1.),
+        Vec3A::new(0., 2., 3.),
         Colour::from_rgba(1., 1., 1., 0.),
     ));
 }
