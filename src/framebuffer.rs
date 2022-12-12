@@ -6,7 +6,7 @@ use std::{
 
 use png::{BitDepth, ColorType, Encoder, ScaledFloat};
 
-use crate::{colour::Colour, photonmap::PhotonMap};
+use crate::colour::Colour;
 
 #[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Pixel {
@@ -48,6 +48,7 @@ impl FrameBuffer {
     }
 
     pub fn add_caustics(&mut self, pmap: &FrameBuffer) -> FrameBuffer {
+        // naively add caustics from a caustics frame buffer
         let mut new_fb = FrameBuffer::new(self.width, self.height);
         for y in 0..self.height {
             for x in 0..self.width {
@@ -85,6 +86,7 @@ impl FrameBuffer {
         writer.write_image_data(&output).unwrap();
         Ok(())
     }
+
     pub fn write_depth_png(&self, filename: &str) -> io::Result<()> {
         // Open file
         let file = File::create(filename)?;
@@ -117,59 +119,6 @@ impl FrameBuffer {
         Ok(())
     }
 
-    pub fn write_rgb_ppm(&self, filename: &str) -> io::Result<()> {
-        let mut min: f32 = 0.;
-        let mut max: f32 = 0.;
-
-        // Calculate colour attenuation
-        for p in &self.buf {
-            min = min.min(p.colour.r).min(p.colour.g).min(p.colour.b);
-            max = max.max(p.colour.r).max(p.colour.g).max(p.colour.b);
-        }
-        let diff = if max == min { 1. } else { max - min };
-
-        // Open file
-        let mut file = File::create(filename)?;
-
-        // Write out file
-        writeln!(file, "P6")?;
-        writeln!(file, "{} {}", self.width, self.height)?;
-        writeln!(file, "255")?;
-
-        let mut output = vec![];
-        for p in &self.buf {
-            output.push((255. * (p.colour.r - min) / diff) as u8);
-            output.push((255. * (p.colour.g - min) / diff) as u8);
-            output.push((255. * (p.colour.b - min) / diff) as u8);
-        }
-        file.write_all(&output)
-    }
-    pub fn write_depth_ppm(&self, filename: &str) -> io::Result<()> {
-        // Open file
-        let mut file = File::create(filename)?;
-        let mut min: f32 = 0.;
-        let mut max: f32 = 0.;
-
-        // Calculate colour attenuation
-        for p in &self.buf {
-            min = min.min(p.depth);
-            max = max.max(p.depth);
-        }
-        let diff = if max == min { 1. } else { max - min };
-
-        // Write out file
-        writeln!(file, "P6")?;
-        writeln!(file, "{} {}", self.width, self.height)?;
-        writeln!(file, "255")?;
-
-        let mut output = vec![];
-        for p in &self.buf {
-            for _ in 0..3 {
-                output.push((255. * (p.depth - min) / diff) as u8);
-            }
-        }
-        file.write_all(&output)
-    }
     pub fn width(&self) -> usize {
         self.width
     }

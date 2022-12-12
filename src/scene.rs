@@ -25,6 +25,7 @@ impl Default for Scene {
 
 impl Scene {
     pub fn trace(&self, ray: &Ray) -> Option<Hit> {
+        // find hits along the given ray with the scene
         let mut best_hit = None;
 
         for object in &self.object_list {
@@ -45,6 +46,7 @@ impl Scene {
     }
 
     pub fn select_first(hits: Vec<Hit>) -> Option<Hit> {
+        // select the front-most hit (the hit with the lowest t value) along the ray
         let mut result: Option<Hit> = None;
         for hit in hits {
             if let Some(h) = &result {
@@ -82,9 +84,12 @@ impl Scene {
         pmap: &PhotonMap,
     ) -> (Colour, f32) {
         if recurse == 0 {
-            return (Colour::from_rgba(0., 0., 0., 1.), 0.);
+            return (
+                // hit recursion depth, return background colour
+                Colour::from_rgba(0., 0., 0., 1.),
+                0.,
+            );
         }
-        // find the closest object
         let best_hit = self.trace(&ray);
 
         if let Some(best) = best_hit {

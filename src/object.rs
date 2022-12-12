@@ -14,7 +14,9 @@ pub mod triangle;
 pub trait Object: Debug {
     fn set_material(&mut self, material: Box<dyn Material + Send + Sync>);
 
+    // find intersections between the object and the ray if they exist
     fn intersection(&self, ray: &Ray) -> Vec<Hit>;
 
+    // transform the object
     fn apply_transform(&mut self, t: Affine3A);
 }

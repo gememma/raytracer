@@ -35,6 +35,7 @@ impl Point {
 
 impl Light for Point {
     fn get_direction(&self, surface: Vertex) -> (Vec3A, bool) {
+        // point lights emit in all directions, so this boolean is always true
         ((self.position - surface).normalize(), true)
     }
 

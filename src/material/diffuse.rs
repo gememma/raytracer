@@ -25,11 +25,11 @@ impl Diffuse {
 impl Material for Diffuse {
     fn compute(
         &self,
-        viewer: Vec3A,
+        _viewer: Vec3A,
         hit: &Hit,
         recurse: usize,
         scene: &Scene,
-        pmap: &PhotonMap,
+        _pmap: &PhotonMap,
     ) -> Colour {
         if recurse < 1 {
             return Colour::default();
@@ -40,13 +40,16 @@ impl Material for Diffuse {
             // ldir is direction towards the light
             let (ldir, mut lit) = light.get_direction(hit.position);
             if ldir.dot(hit.normal) < 0. {
-                // Light is facing wrong way.
+                // light is facing wrong way
                 lit = false;
             }
+
             if lit {
+                // check for objects between position and light
                 lit = !scene
                     .shadow_trace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
             }
+
             if lit {
                 let intensity = light.get_intensity(hit.position);
                 let dotprod = hit.normal.dot(ldir);
@@ -63,6 +66,7 @@ impl Material for Diffuse {
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {
+        // darker objects are more likely to absorb light
         let diffuse_p = (self.colour.r + self.colour.g + self.colour.b) / 3.;
         if random::<f32>() > diffuse_p {
             Interaction::Absorbed

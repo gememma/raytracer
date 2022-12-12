@@ -27,6 +27,7 @@ impl Phong {
             power,
         }
     }
+
     // diffuse and specular terms
     fn compute_per_light(&self, viewer: Vec3A, hit: &Hit, ldir: Vec3A) -> Colour {
         let dotprod = hit.normal.dot(ldir);
@@ -59,11 +60,12 @@ impl Material for Phong {
             let (ldir, mut lit) = light.get_direction(hit.position);
 
             if ldir.dot(hit.normal) < 0. {
-                // Light is facing wrong way.
+                // light is facing wrong way
                 lit = false;
             }
 
             if lit {
+                // check for objects between position and light
                 lit = !scene
                     .shadow_trace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
             }

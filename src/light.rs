@@ -8,10 +8,12 @@ pub mod directional;
 pub mod point;
 
 pub trait Light: Debug {
-    // Get direction towards the light from the surface point
+    // get direction towards the light from the surface point
     fn get_direction(&self, surface: Vertex) -> (Vec3A, bool);
 
+    // get light intensity at given location
     fn get_intensity(&self, surface: Vertex) -> Colour;
 
+    // emit a new photon
     fn generate_photon(&self) -> Photon;
 }

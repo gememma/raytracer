@@ -42,7 +42,7 @@ impl FullCamera {
         let vertical = 0.5 * v;
 
         let bottom_left_pixel = position + (-horizontal - vertical + fov * w) * focal_distance;
-        let lens_radius = aperture / 2.; // used to create sample rays, this is ok
+        let lens_radius = aperture / 2.; // used to create sample rays
 
         Self {
             width,
@@ -78,7 +78,7 @@ impl FullCamera {
         )
     }
     pub fn render(&self, env: &Scene, fb: &mut FrameBuffer, pmap: &PhotonMap) {
-        // This method spawns threads that raytrace in parallel for speed
+        // this method spawns threads that raytrace in parallel for speed
         thread::scope(|s| {
             let (tx, rx) = channel();
             let thread_num = 8;
@@ -114,7 +114,9 @@ impl FullCamera {
             });
         });
     }
+
     pub fn visualise_photons(&self, map: &PhotonMap, env: &Scene, fb: &mut FrameBuffer) {
+        // similar to render() function, visualises a photon map for debugging and caustics
         thread::scope(|s| {
             let (tx, rx) = channel();
             let thread_num = 8;

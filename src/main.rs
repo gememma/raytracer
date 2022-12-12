@@ -41,16 +41,16 @@ fn main() {
     let camera = FullCamera::new(
         1.,
         Vertex::new(0., 0., 0.),
-        Vertex::new(0., 0., 6.),
+        Vertex::new(0., 0., 7.),
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
         100,
-        0.,
+        0.01,
     );
 
     // build caustics map WARNING: SLOW
-    // let caustic_pmap = PhotonMap::build_caustics(&scene);
+    // let caustic_pmap = PhotonMap::build(&scene);
 
     // camera generates rays for each pixel in the framebuffer and records colour + depth.
     let pmap = PhotonMap::build(&scene);
@@ -233,12 +233,12 @@ fn build_scene(scene: &mut Scene) {
     scene.add_object(pm);
 
     // create random colour/size/position spheres
-    for _ in 1..10 {
-        let mut sphere = spawn_sphere(Vec3A::new(-2., -1., 5.), Vec3A::new(2., 2., 9.), 0.6);
-        let c = Colour::random(0.1, 0.7);
-        sphere.set_material(Box::new(Diffuse::new(c)));
-        scene.add_object(sphere);
-    }
+    // for _ in 1..10 {
+    //     let mut sphere = spawn_sphere(Vec3A::new(-2., -1., 5.), Vec3A::new(2., 2., 9.), 0.6);
+    //     let c = Colour::random(0.1, 0.7);
+    //     sphere.set_material(Box::new(Diffuse::new(c)));
+    //     scene.add_object(sphere);
+    // }
 
     // create glass spheres
     let mut gl_sphere1 = Sphere::new(Vec3A::new(-1.8, -2.5, 6.5), 0.6);

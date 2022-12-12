@@ -35,7 +35,8 @@ impl Dielectric {
     }
 
     fn reflectance(cos: f32, index: f32) -> f32 {
-        // the Schlick approximation for reflectance
+        // calculate probability of reflected hit
+        // use the Schlick approximation for reflectance
         let r0 = ((1. - index) / (1. + index)).powi(2);
         r0 + (1. - r0) * (1. - cos).powi(5)
     }
@@ -66,11 +67,13 @@ impl Material for Dielectric {
         } else {
             self.refractive_index / 1.0003
         };
+
         let cos_theta = (-hit.incident.direction.normalize())
             .dot(hit.normal)
             .min(1.);
         let sin_theta = (1. - cos_theta.powi(2)).sqrt();
         let refl_probability = Dielectric::reflectance(cos_theta, ratio);
+
         if ratio * sin_theta <= 1. && random::<f32>() > refl_probability {
             let r = Dielectric::refract(hit, ratio);
             let ray = Ray::new(hit.position + 0.001 * r, r);

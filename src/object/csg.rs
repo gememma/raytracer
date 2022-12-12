@@ -66,7 +66,9 @@ where
 }
 
 impl Object for Csg {
-    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {}
+    fn set_material(&mut self, _material: Box<dyn Material + Send + Sync>) {
+        // CSGs do not have their own material
+    }
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         match self {
@@ -206,6 +208,7 @@ impl Op {
 }
 
 fn keep<'a>(source: &mut VecDeque<Hit<'a>>, dest: &mut Vec<Hit<'a>>, inside: &mut bool) {
+    // keep the remaining intersection points in source
     *inside = !*inside;
     let val = source.pop_front().unwrap();
     dest.push(val);
@@ -213,6 +216,6 @@ fn keep<'a>(source: &mut VecDeque<Hit<'a>>, dest: &mut Vec<Hit<'a>>, inside: &mu
 
 fn discard(source: &mut VecDeque<Hit>, inside: &mut bool) {
     *inside = !*inside;
-    // discard unneeded with _
+    // pop and discard unneeded intersection points with _
     let _ = source.pop_front().unwrap();
 }

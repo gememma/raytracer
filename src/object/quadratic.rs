@@ -50,8 +50,9 @@ impl Object for Quadratic {
             + self.coeffs[4] * dy.powi(2)
             + 2. * self.coeffs[5] * dy * dz
             + self.coeffs[7] * dz.powi(2);
+
         if aq > -epsilon && aq < epsilon {
-            // only one intersection, ignore
+            // only one intersection, safely ignore
             return Vec::new();
         }
         let bq = 2.
@@ -102,6 +103,7 @@ impl Object for Quadratic {
             )
             .normalize();
             let entering = normal.dot(ray.direction) < 0.;
+            // flip normals for back face hits
             if !entering {
                 normal = -normal
             }

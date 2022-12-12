@@ -45,7 +45,7 @@ impl PolyMesh {
             panic!("Mesh file doesn't start with kcply");
         }
 
-        // Read in number of vertices and faces
+        // read in number of vertices and faces
         let line2 = lines.next().expect("Line 2 is right");
         let vertex_count = line2
             .strip_prefix("element vertex ")
@@ -175,6 +175,7 @@ impl Object for PolyMesh {
                     -e1.cross(e2)
                 };
                 let entering = plane_normal.dot(ray.direction) < 0.;
+                // flip normals for back face hits
                 if !entering {
                     plane_normal = -plane_normal
                 }
