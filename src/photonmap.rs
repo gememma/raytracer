@@ -24,6 +24,7 @@ pub enum Type {
     Shadow,
 }
 
+#[derive(Debug)]
 pub enum Interaction {
     Reflected { ray: Ray, attenuation: Colour },
     Transmitted { ray: Ray, attenuation: Colour },
@@ -91,7 +92,7 @@ impl<'a> PhotonMap<'a> {
     pub fn build_caustics(scene: &'a Scene) -> Self {
         // build a photon map for caustics by firing lots of photons at metals and glass
         let mut tree = KdTree::new();
-        let photon_number = 150000;
+        let photon_number = 10000000;
 
         for light in &scene.light_list {
             for _ in 0..photon_number {
@@ -182,7 +183,7 @@ impl<'a> PhotonMap<'a> {
 
     pub fn visualise(&self, pos: Vertex) -> (Colour, usize) {
         let neighbours = 1000;
-        let radius = 0.5;
+        let radius = 0.3;
         let nearest = self
             .tree
             .k_nearest_within(&[pos.x, pos.y, pos.z], neighbours, radius);
@@ -195,8 +196,8 @@ impl<'a> PhotonMap<'a> {
     }
 
     pub fn visualise_caustics(&self, pos: Vertex) -> (Colour, usize) {
-        let neighbours = 1000;
-        let radius = 0.5;
+        let neighbours = 10000;
+        let radius = 0.4;
         let nearest = self
             .tree
             .k_nearest_within(&[pos.x, pos.y, pos.z], neighbours, radius);

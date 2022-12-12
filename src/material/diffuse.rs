@@ -58,12 +58,18 @@ impl Material for Diffuse {
                 colour += intensity * diffuse;
             }
         }
-        let mut r = random_in_unit_sphere() + hit.normal;
-        if r.length() < 0.0001 {
-            r = hit.normal;
+
+        match self.interact(&hit) {
+            Interaction::Reflected { .. } => {
+                let mut r = random_in_unit_sphere() + hit.normal;
+                if r.length() < 0.0001 {
+                    r = hit.normal;
+                }
+                let ray = Ray::new(hit.position + 0.001 * r, r);
+                colour + scene.raytrace(ray, recurse - 1, viewer, pmap).0 * 0.5
+            }
+            _ => colour,
         }
-        let ray = Ray::new(hit.position + 0.001 * r, r);
-        colour + scene.raytrace(ray, recurse - 1, viewer, pmap).0 * 0.3
     }
 
     fn interact(&self, hit: &Hit) -> Interaction {
