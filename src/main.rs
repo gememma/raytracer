@@ -214,25 +214,9 @@ fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
 }
 
 fn build_scene(scene: &mut Scene) {
-    // materials
-    let mat_white = Phong::new(
-        Colour::from_rgb(0.1, 0.1, 0.1),
-        Colour::from_rgb(0.6, 0.6, 0.6),
-        Colour::from_rgb(0.4, 0.4, 0.4),
-        40.,
-    );
-    let mat_red = Phong::new(
-        Colour::from_rgb(0.2, 0., 0.),
-        Colour::from_rgb(0.4, 0., 0.),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
-    let mat_green = Phong::new(
-        Colour::from_rgb(0., 0.2, 0.),
-        Colour::from_rgb(0., 0.4, 0.),
-        Colour::from_rgb(0.5, 0.5, 0.5),
-        40.,
-    );
+    let mat_white = Diffuse::new(Colour::from_rgb(0.6, 0.6, 0.6));
+    let mat_red = Diffuse::new(Colour::from_rgb(0.4, 0., 0.));
+    let mat_green = Diffuse::new(Colour::from_rgb(0., 0.64, 0.));
     let mat_glass = Dielectric::new(1.52);
 
     // create teapot
@@ -244,22 +228,14 @@ fn build_scene(scene: &mut Scene) {
         Vec3A::new(0., 1., 0.),
         Vec3A::new(0., -2.7, 7.),
     ));
-    pm.set_material(Box::new(Metallic::new(
-        Colour::from_rgb(0.7, 0.6, 0.85),
-        0.,
-    )));
+    pm.set_material(Box::new(mat_glass.clone()));
     scene.add_object(pm);
 
     // create random colour/size/position spheres
     for _ in 1..10 {
         let mut sphere = spawn_sphere(Vec3A::new(-2., -1., 5.), Vec3A::new(2., 2., 9.), 0.6);
         let c = Colour::random(0.1, 0.7);
-        sphere.set_material(Box::new(Phong::new(
-            c * 0.6,
-            c,
-            Colour::from_rgb(0.5, 0.5, 0.5),
-            40.,
-        )));
+        sphere.set_material(Box::new(Diffuse::new(c)));
         scene.add_object(sphere);
     }
 

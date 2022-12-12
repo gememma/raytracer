@@ -39,7 +39,6 @@ impl Object for Quadratic {
     }
 
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
-        // TODO: fix refraction term for dialectric material
         let epsilon = 0.0000001;
         let [dx, dy, dz] = [ray.direction.x, ray.direction.y, ray.direction.z];
         let [px, py, pz] = [ray.position.x, ray.position.y, ray.position.z];
@@ -87,7 +86,7 @@ impl Object for Quadratic {
         let mut hits = vec![];
         for t in vec![t0, t1] {
             let hit_pos = ray.position + t * ray.direction;
-            let normal = Vec3A::new(
+            let mut normal = Vec3A::new(
                 self.coeffs[0] * hit_pos.x
                     + self.coeffs[1] * hit_pos.y
                     + self.coeffs[2] * hit_pos.z
@@ -103,6 +102,9 @@ impl Object for Quadratic {
             )
             .normalize();
             let entering = normal.dot(ray.direction) < 0.;
+            if !entering {
+                normal = -normal
+            }
             let h = Hit {
                 t,
                 entering,

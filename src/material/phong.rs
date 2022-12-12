@@ -49,7 +49,7 @@ impl Material for Phong {
         hit: &Hit,
         _recurse: usize,
         scene: &Scene,
-        pmap: &PhotonMap,
+        _pmap: &PhotonMap,
     ) -> Colour {
         let ambient_intensity = 0.3;
         let mut colour = self.ambient * ambient_intensity;
