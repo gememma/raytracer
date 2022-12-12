@@ -4,7 +4,6 @@ use rand::{random, Rng};
 use crate::{
     colour::Colour,
     hit::Hit,
-    light::point::random_in_unit_sphere,
     material::Material,
     photonmap::{Interaction, PhotonMap},
     ray::Ray,

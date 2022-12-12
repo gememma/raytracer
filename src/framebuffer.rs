@@ -1,8 +1,4 @@
-use std::{
-    fs::File,
-    io,
-    io::{BufWriter, Write},
-};
+use std::{fs::File, io, io::BufWriter};
 
 use png::{BitDepth, ColorType, Encoder, ScaledFloat};
 
@@ -52,7 +48,7 @@ impl FrameBuffer {
         let mut new_fb = FrameBuffer::new(self.width, self.height);
         for y in 0..self.height {
             for x in 0..self.width {
-                let mut colour = if !pmap.get_pixel(x, y).is_nan() {
+                let colour = if !pmap.get_pixel(x, y).is_nan() {
                     self.get_pixel(x, y) + pmap.get_pixel(x, y)
                 } else {
                     self.get_pixel(x, y)

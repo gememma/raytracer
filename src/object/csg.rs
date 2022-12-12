@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::VecDeque, ops::Not};
+use std::{cmp::Ordering, collections::VecDeque};
 
 use glam::Affine3A;
 
@@ -92,7 +92,13 @@ impl Object for Csg {
     }
 
     fn apply_transform(&mut self, t: Affine3A) {
-        todo!()
+        match self {
+            Csg::Branch { child1, child2, .. } => {
+                child1.apply_transform(t);
+                child2.apply_transform(t);
+            }
+            Csg::Leaf { object } => object.apply_transform(t),
+        }
     }
 }
 

@@ -4,29 +4,17 @@ use raytracer::{
     colour::Colour,
     framebuffer::FrameBuffer,
     fullcamera::FullCamera,
-    light::{directional::Directional, point::Point},
-    material::{
-        dielectric::Dielectric, diffuse::Diffuse, metallic::Metallic, normalshading::NormalShading,
-        phong::Phong,
-    },
-    object::{
-        csg::{Csg, Op},
-        plane::Plane,
-        polymesh::PolyMesh,
-        quadratic::Quadratic,
-        sphere::Sphere,
-        triangle::Triangle,
-        Object,
-    },
+    light::point::Point,
+    material::{dielectric::Dielectric, diffuse::Diffuse, metallic::Metallic, phong::Phong},
+    object::{polymesh::PolyMesh, sphere::Sphere, triangle::Triangle, Object},
     photonmap::PhotonMap,
     scene::Scene,
     Vertex,
 };
 
 fn main() {
-    // create framebuffers
+    // create framebuffer for render output
     let mut fb = FrameBuffer::default();
-    let mut photons_fb = FrameBuffer::default();
 
     // create a scene
     let mut scene = Scene::default();
@@ -50,6 +38,7 @@ fn main() {
     );
 
     // build caustics map WARNING: SLOW
+    // let mut photons_fb = FrameBuffer::default();
     // let caustic_pmap = PhotonMap::build(&scene);
 
     // camera generates rays for each pixel in the framebuffer and records colour + depth.
@@ -204,6 +193,7 @@ fn build_c_box(scene: &mut Scene) {
     ));
 }
 
+#[allow(dead_code)]
 fn spawn_sphere(min_pos: Vec3A, max_pos: Vec3A, max_rad: f32) -> Sphere {
     // generate a randomly sized and positioned sphere
     let x = rand::thread_rng().gen_range(min_pos.x..max_pos.x);
@@ -219,10 +209,12 @@ fn build_scene(scene: &mut Scene) {
     let mat_red = Diffuse::new(Colour::from_rgb(0.6, 0., 0.));
     let mat_green = Diffuse::new(Colour::from_rgb(0., 0.6, 0.));
     let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 0.9, 0.8));
+    let mat_metal = Metallic::new(Colour::from_rgb(0.8, 0.8, 1.), 0.);
 
     // create teapot
     let mut pm = PolyMesh::new("teapot_smaller.ply", true, false);
     pm.apply_transform(Affine3A::from_scale(Vec3::new(0.6, 0.6, 0.6)));
+    pm.apply_transform(Affine3A::from_rotation_z(0.5));
     pm.apply_transform(Affine3A::from_cols(
         Vec3A::new(1., 0., 0.),
         Vec3A::new(0., 0., 1.),
@@ -233,16 +225,16 @@ fn build_scene(scene: &mut Scene) {
     scene.add_object(pm);
 
     // create random colour/size/position spheres
-    // for _ in 1..10 {
-    //     let mut sphere = spawn_sphere(Vec3A::new(-2., -1., 5.), Vec3A::new(2., 2., 9.), 0.6);
-    //     let c = Colour::random(0.1, 0.7);
-    //     sphere.set_material(Box::new(Diffuse::new(c)));
-    //     scene.add_object(sphere);
-    // }
+    for _ in 1..6 {
+        let mut sphere = spawn_sphere(Vec3A::new(-2., 0., 6.5), Vec3A::new(2., 2., 9.), 0.6);
+        let c = Colour::random(0.1, 0.7);
+        sphere.set_material(Box::new(Diffuse::new(c)));
+        scene.add_object(sphere);
+    }
 
-    // create glass spheres
-    let mut gl_sphere1 = Sphere::new(Vec3A::new(-1.8, -2.5, 6.5), 0.6);
-    gl_sphere1.set_material(Box::new(mat_glass.clone()));
+    // create glass and metal spheres
+    let mut gl_sphere1 = Sphere::new(Vec3A::new(-1.8, -2.1, 9.), 0.9);
+    gl_sphere1.set_material(Box::new(mat_metal.clone()));
     scene.add_object(gl_sphere1);
     let mut gl_sphere2 = Sphere::new(Vec3A::new(1.4, -2.7, 7.), 0.3);
     gl_sphere2.set_material(Box::new(mat_glass.clone()));

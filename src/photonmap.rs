@@ -1,6 +1,6 @@
 use acap::{kd::KdTree, Coordinates, Euclidean, EuclideanDistance, NearestNeighbors, Proximity};
 
-use crate::{colour::Colour, hit::Hit, material::Material, ray::Ray, scene::Scene, Vertex};
+use crate::{colour::Colour, hit::Hit, ray::Ray, scene::Scene, Vertex};
 
 pub struct PhotonMap<'a> {
     tree: KdTree<PhotonHit<'a>>,
@@ -106,7 +106,7 @@ impl<'a> PhotonMap<'a> {
                     // discard absorbed direct hits for caustics
                     if ph.photon.type_ == Type::Direct {
                         match ph.hit.material.interact(&ph.hit) {
-                            Interaction::Transmitted { ray, attenuation } => {
+                            Interaction::Transmitted { .. } => {
                                 tree.push(ph);
                             }
                             Interaction::Reflected { .. } | Interaction::Absorbed => {
@@ -215,8 +215,9 @@ impl<'a> PhotonMap<'a> {
         (colour / n as f32, n)
     }
 
-    pub fn get_radiance_est(&self, h: Hit) -> (Colour) {
-        todo!()
+    pub fn get_radiance_est(&self, _h: Hit) -> Colour {
+        // used during rendering (second pass)
+        unimplemented!()
     }
 }
 
