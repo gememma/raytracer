@@ -32,6 +32,11 @@ impl Light for Directional {
         (-self.direction, true)
     }
 
+    fn get_position(&self) -> Option<Vertex> {
+        // directional lights have no position
+        None
+    }
+
     fn get_intensity(&self, _surface: Vertex) -> Colour {
         self.intensity
     }

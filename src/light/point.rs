@@ -39,6 +39,10 @@ impl Light for Point {
         ((self.position - surface).normalize(), true)
     }
 
+    fn get_position(&self) -> Option<Vertex> {
+        Some(self.position)
+    }
+
     fn get_intensity(&self, _surface: Vertex) -> Colour {
         self.intensity
     }

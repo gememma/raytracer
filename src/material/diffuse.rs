@@ -8,6 +8,7 @@ use crate::{
     photonmap::{Interaction, PhotonMap},
     ray::Ray,
     scene::Scene,
+    Vertex,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -44,9 +45,12 @@ impl Material for Diffuse {
             }
 
             if lit {
+                let limit = match light.get_position() {
+                    None => f32::INFINITY,
+                    Some(pos) => (pos - hit.position).length(),
+                };
                 // check for objects between position and light
-                lit = !scene
-                    .shadow_trace(&Ray::new(hit.position + 0.0001 * ldir, ldir), f32::INFINITY);
+                lit = !scene.shadow_trace(&Ray::new(hit.position + 0.0001 * ldir, ldir), limit);
             }
 
             if lit {
