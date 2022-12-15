@@ -37,12 +37,12 @@ fn main() {
     let camera = FullCamera::new(
         1.,
         Vertex::new(0., 0., 0.),
-        Vertex::new(0., 0., 7.5),
+        Vertex::new(0., 0., 8.),
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
         1000,
-        0.05,
+        0.25,
     );
 
     // build caustics map WARNING: SLOW
@@ -252,8 +252,8 @@ fn build_final_scene(scene: &mut Scene) {
     sphere_sm_3.set_material(Box::new(mat_glass.clone()));
     let mut sphere_sm_4 = Sphere::new(Vec3A::new(0.75, -2.75, 6.75), 0.25);
     sphere_sm_4.set_material(Box::new(mat_glass.clone()));
-    let mut glass_obj_p1 = Csg::new_branch(sphere_sm_1, sphere_sm_2, Op::Union);
-    let mut glass_obj_p2 = Csg::new_branch(sphere_sm_3, sphere_sm_4, Op::Union);
+    let glass_obj_p1 = Csg::new_branch(sphere_sm_1, sphere_sm_2, Op::Union);
+    let glass_obj_p2 = Csg::new_branch(sphere_sm_3, sphere_sm_4, Op::Union);
     let mut glass_obj = Csg::new_branch(glass_obj_p1, glass_obj_p2, Op::Union);
     let t = Affine3A::from_translation(Vec3::new(-0.5, 0., 0.3)) * Affine3A::from_rotation_y(0.05);
     glass_obj.apply_transform(t);
@@ -271,44 +271,13 @@ fn build_final_scene(scene: &mut Scene) {
         t,
     ));
 
-    // lights: 3x3 grid of point lights serves as a fake area light
     scene.add_light(Point::new(
-        Vec3A::new(0., 2.8, 5.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-    scene.add_light(Point::new(
-        Vec3A::new(0., 2.8, 6.),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-    scene.add_light(Point::new(
-        Vec3A::new(0., 2.8, 6.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-
-    scene.add_light(Point::new(
-        Vec3A::new(-0.5, 2.8, 5.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
+        Vec3A::new(0.5, 2.8, 6.),
+        Colour::from_rgb(0.8, 0.8, 0.8),
     ));
     scene.add_light(Point::new(
         Vec3A::new(-0.5, 2.8, 6.),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-    scene.add_light(Point::new(
-        Vec3A::new(-0.5, 2.8, 6.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-
-    scene.add_light(Point::new(
-        Vec3A::new(0.5, 2.8, 5.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-    scene.add_light(Point::new(
-        Vec3A::new(0.5, 2.8, 6.),
-        Colour::from_rgb(0.2, 0.2, 0.2),
-    ));
-    scene.add_light(Point::new(
-        Vec3A::new(0.5, 2.8, 6.5),
-        Colour::from_rgb(0.2, 0.2, 0.2),
+        Colour::from_rgb(0.8, 0.8, 0.8),
     ));
 }
 

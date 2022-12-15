@@ -8,7 +8,6 @@ use crate::{
     photonmap::{Interaction, PhotonMap},
     ray::Ray,
     scene::Scene,
-    Vertex,
 };
 
 #[derive(Clone, Debug, PartialEq)]
