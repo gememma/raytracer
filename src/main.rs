@@ -42,7 +42,7 @@ fn main() {
         fb.width(),
         fb.height(),
         1000,
-        0.01,
+        0.05,
     );
 
     // build caustics map WARNING: SLOW
@@ -74,7 +74,7 @@ fn build_final_scene(scene: &mut Scene) {
     let mat_white = Diffuse::new(Colour::from_rgb(0.6, 0.6, 0.6));
     let mat_red = Diffuse::new(Colour::from_rgb(0.6, 0., 0.));
     let mat_green = Diffuse::new(Colour::from_rgb(0., 0.6, 0.));
-    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 1., 1.));
+    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(0.95, 0.95, 0.95));
     let mat_metal = Metallic::new(Colour::from_rgb(0.8, 0.8, 1.), 0.);
     let mat_metal_r = Metallic::new(Colour::from_rgb(0.8, 0.8, 1.), 0.05);
 
@@ -85,7 +85,7 @@ fn build_final_scene(scene: &mut Scene) {
             Vec3A::new(-3., -3., 4.),
             Vec3A::new(3., -3., 4.),
         ],
-        Box::new(mat_white.clone()),
+        Box::new(mat_metal_r.clone()),
     ));
     scene.add_object(Triangle::new_with_material(
         [
@@ -93,7 +93,7 @@ fn build_final_scene(scene: &mut Scene) {
             Vec3A::new(3., -3., 10.),
             Vec3A::new(-3., -3., 10.),
         ],
-        Box::new(mat_white.clone()),
+        Box::new(mat_metal_r.clone()),
     ));
 
     // ceiling
@@ -176,7 +176,7 @@ fn build_final_scene(scene: &mut Scene) {
             Vec3A::new(0., -0.5, 8.),
             Vec3A::new(0., -3., 8.),
         ],
-        Box::new(mat_metal_r.clone()),
+        Box::new(mat_metal.clone()),
     ));
     scene.add_object(Triangle::new_with_material(
         [
@@ -184,7 +184,7 @@ fn build_final_scene(scene: &mut Scene) {
             Vec3A::new(-1.5, -3., 7.25),
             Vec3A::new(-1.5, -0.5, 7.25),
         ],
-        Box::new(mat_metal_r.clone()),
+        Box::new(mat_metal.clone()),
     ));
     // left face
     scene.add_object(Triangle::new_with_material(
@@ -235,7 +235,7 @@ fn build_final_scene(scene: &mut Scene) {
     scene.add_object(pm);
 
     // large sphere
-    let mut sphere_lrg = Sphere::new(Vec3A::new(1.5, -2.1, 7.6), 0.9);
+    let mut sphere_lrg = Sphere::new(Vec3A::new(1.65, -2.05, 7.6), 0.95);
     sphere_lrg.set_material(Box::new(mat_metal.clone()));
     scene.add_object(sphere_lrg);
 
@@ -273,41 +273,41 @@ fn build_final_scene(scene: &mut Scene) {
 
     // lights: 3x3 grid of point lights serves as a fake area light
     scene.add_light(Point::new(
-        Vec3A::new(0., 2.8, 5.8),
+        Vec3A::new(0., 2.8, 5.5),
         Colour::from_rgb(0.2, 0.2, 0.2),
     ));
-    // scene.add_light(Point::new(
-    //     Vec3A::new(0., 2.8, 6.),
-    //     Colour::from_rgb(0.2, 0.2, 0.2),
-    // ));
     scene.add_light(Point::new(
-        Vec3A::new(0., 2.8, 6.2),
+        Vec3A::new(0., 2.8, 6.),
+        Colour::from_rgb(0.2, 0.2, 0.2),
+    ));
+    scene.add_light(Point::new(
+        Vec3A::new(0., 2.8, 6.5),
         Colour::from_rgb(0.2, 0.2, 0.2),
     ));
 
-    // scene.add_light(Point::new(
-    //     Vec3A::new(-0.2, 2.8, 5.8),
-    //     Colour::from_rgb(0.2, 0.2, 0.2),
-    // ));
     scene.add_light(Point::new(
-        Vec3A::new(-0.2, 2.8, 6.),
+        Vec3A::new(-0.5, 2.8, 5.5),
         Colour::from_rgb(0.2, 0.2, 0.2),
     ));
-    // scene.add_light(Point::new(
-    //     Vec3A::new(-0.2, 2.8, 6.2),
-    //     Colour::from_rgb(0.2, 0.2, 0.2),
-    // ));
+    scene.add_light(Point::new(
+        Vec3A::new(-0.5, 2.8, 6.),
+        Colour::from_rgb(0.2, 0.2, 0.2),
+    ));
+    scene.add_light(Point::new(
+        Vec3A::new(-0.5, 2.8, 6.5),
+        Colour::from_rgb(0.2, 0.2, 0.2),
+    ));
 
     scene.add_light(Point::new(
-        Vec3A::new(0.2, 2.8, 5.8),
+        Vec3A::new(0.5, 2.8, 5.5),
         Colour::from_rgb(0.2, 0.2, 0.2),
     ));
-    // scene.add_light(Point::new(
-    //     Vec3A::new(0.2, 2.8, 6.),
-    //     Colour::from_rgb(0.2, 0.2, 0.2),
-    // ));
     scene.add_light(Point::new(
-        Vec3A::new(0.2, 2.8, 6.2),
+        Vec3A::new(0.5, 2.8, 6.),
+        Colour::from_rgb(0.2, 0.2, 0.2),
+    ));
+    scene.add_light(Point::new(
+        Vec3A::new(0.5, 2.8, 6.5),
         Colour::from_rgb(0.2, 0.2, 0.2),
     ));
 }
