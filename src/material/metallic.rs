@@ -10,7 +10,7 @@ use crate::{
     scene::Scene,
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Metallic {
     colour: Colour,
     roughness: f32,

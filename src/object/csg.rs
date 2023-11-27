@@ -66,10 +66,6 @@ where
 }
 
 impl Object for Csg {
-    fn set_material(&mut self, _material: Box<dyn Material + Send + Sync>) {
-        // CSGs do not have their own material
-    }
-
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         match self {
             Csg::Branch {

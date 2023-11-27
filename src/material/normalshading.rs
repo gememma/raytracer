@@ -8,7 +8,7 @@ use crate::{
     scene::Scene,
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct NormalShading;
 
 impl Material for NormalShading {

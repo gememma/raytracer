@@ -16,36 +16,22 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    pub fn new(corners @ [v0, v1, v2]: [Vertex; 3]) -> Self {
+    pub fn new<M>(corners @ [v0, v1, v2]: [Vertex; 3], material: M) -> Self
+    where
+        M: Material + Send + Sync + 'static,
+    {
         let e1 = v1 - v0;
         let e2 = v2 - v0;
         let normal = e1.cross(e2).normalize();
         Triangle {
             normal,
             corners,
-            material: Box::new(NormalShading::default()),
-        }
-    }
-    pub fn new_with_material(
-        corners @ [v0, v1, v2]: [Vertex; 3],
-        material: Box<dyn Material + Send + Sync>,
-    ) -> Self {
-        let e1 = v1 - v0;
-        let e2 = v2 - v0;
-        let normal = e1.cross(e2).normalize();
-        Triangle {
-            normal,
-            corners,
-            material,
+            material: Box::new(material),
         }
     }
 }
 
 impl Object for Triangle {
-    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
-        self.material = material;
-    }
-
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         let epsilon = 0.0001;
         let [c0, c1, c2] = self.corners.clone();

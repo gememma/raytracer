@@ -1,12 +1,7 @@
 use glam::{Affine3A, Vec3A};
 
 use super::Object;
-use crate::{
-    hit::Hit,
-    material::{normalshading::NormalShading, Material},
-    ray::Ray,
-    Vertex,
-};
+use crate::{hit::Hit, material::Material, ray::Ray, Vertex};
 
 #[derive(Debug)]
 pub struct Sphere {
@@ -16,20 +11,19 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(center: Vertex, radius: f32) -> Self {
+    pub fn new<M>(center: Vertex, radius: f32, material: M) -> Self
+    where
+        M: Material + Send + Sync + 'static,
+    {
         Self {
             center,
             radius,
-            material: Box::new(NormalShading::default()),
+            material: Box::new(material),
         }
     }
 }
 
 impl Object for Sphere {
-    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
-        self.material = material;
-    }
-
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         // offset ray by sphere position
         let ro = Vec3A::new(

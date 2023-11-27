@@ -26,10 +26,6 @@ impl Plane {
 }
 
 impl Object for Plane {
-    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
-        self.material = material;
-    }
-
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         let epsilon = 0.0000001;
         let a = self.normal.dot(ray.direction);

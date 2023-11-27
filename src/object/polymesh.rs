@@ -36,7 +36,10 @@ pub struct PolyMesh {
 }
 
 impl PolyMesh {
-    pub fn new(filename: &str, smoothing: bool, one_ind: bool) -> Self {
+    pub fn new<M>(filename: &str, smoothing: bool, one_ind: bool, material: M) -> Self
+    where
+        M: Material + Send + Sync + 'static,
+    {
         // if the .ply file is 1-indexed, adjust accordingly
         let n = if one_ind { 1 } else { 0 };
         let contents = fs::read_to_string(filename).expect("Should read the file");
@@ -127,16 +130,12 @@ impl PolyMesh {
         PolyMesh {
             triangles,
             smoothing,
-            material: Box::new(NormalShading::default()),
+            material: Box::new(material),
         }
     }
 }
 
 impl Object for PolyMesh {
-    fn set_material(&mut self, material: Box<dyn Material + Send + Sync>) {
-        self.material = material;
-    }
-
     fn intersection(&self, ray: &Ray) -> Vec<Hit> {
         let mut hits = vec![];
         let epsilon = 0.0000001;
