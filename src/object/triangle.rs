@@ -2,7 +2,7 @@ use glam::{Affine3A, Vec3A};
 
 use crate::{
     hit::Hit,
-    material::{normalshading::NormalShading, Material},
+    material::{Material},
     object::Object,
     ray::Ray,
     Vertex,

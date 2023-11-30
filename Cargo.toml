@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 acap = "0.3.0"
+clap = { version = "4.4.10", features = ["derive"] }
 glam = "0.21.3"
 indicatif = "0.17.1"
 png = "0.17.6"

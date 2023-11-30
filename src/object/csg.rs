@@ -4,7 +4,6 @@ use glam::Affine3A;
 
 use crate::{
     hit::Hit,
-    material::Material,
     object::{
         plane::Plane, polymesh::PolyMesh, quadratic::Quadratic, sphere::Sphere, triangle::Triangle,
         Object,
