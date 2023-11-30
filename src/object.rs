@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use glam::Affine3A;
 
-use crate::{hit::Hit, material::Material, ray::Ray};
+use crate::{hit::Hit, ray::Ray};
 
 pub mod csg;
 pub mod plane;

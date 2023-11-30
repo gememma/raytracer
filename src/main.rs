@@ -1,3 +1,4 @@
+use clap::Parser;
 use glam::{Affine3A, Vec3, Vec3A};
 use raytracer::{
     colour::Colour,
@@ -17,19 +18,52 @@ use raytracer::{
     Vertex,
 };
 
+enum SceneOption {
+    Cornell,
+    Full,
+    Material,
+}
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    // scene name to render
+    #[arg(short, long)]
+    scene: String,
+
+    // resolution, the number p of pixels in a pxp output
+    #[arg(short, long, default_value_t = 512)]
+    resolution: usize,
+
+    // samples
+    #[arg(long, default_value_t = 500)]
+    samples: usize,
+}
+
 fn main() {
+    // parse command line args
+    let args = Args::parse();
+    let scene_option;
+    match args.scene.to_lowercase().trim() {
+        "cornell" => scene_option = SceneOption::Cornell,
+        "full" => scene_option = SceneOption::Full,
+        "material" => scene_option = SceneOption::Material,
+        _ => {
+            scene_option = SceneOption::Cornell;
+            println!("Could not parse scene argument, Cornell box will be used by default.")
+        }
+    }
+
     // create framebuffer for render output
-    let mut fb = FrameBuffer::default();
+    let mut fb = FrameBuffer::new(args.resolution, args.resolution);
 
-    // create a scene
+    // create and setup the scene
     let mut scene = Scene::default();
-
-    // setup the scene
-    // build_scene(&mut scene);
-    build_final_scene(&mut scene);
-
-    // setup a Cornell box for debugging
-    // build_c_box(&mut scene);
+    match scene_option {
+        SceneOption::Cornell => build_c_box(&mut scene),
+        SceneOption::Full => build_final_scene(&mut scene),
+        SceneOption::Material => build_material_scene(&mut scene),
+    }
 
     // define a camera
     let camera = FullCamera::new(
@@ -39,7 +73,7 @@ fn main() {
         Vec3A::new(0., 1., 0.),
         fb.width(),
         fb.height(),
-        1000,
+        args.samples,
         0.,
     );
 
@@ -288,10 +322,10 @@ fn spawn_pyramid(a: Vec3A, b: Vec3A, c: Vec3A, d: Vec3A, e: Vec3A, t: Affine3A) 
     pyramid
 }
 
-#[allow(dead_code)]
 fn build_c_box(scene: &mut Scene) {
-    // builds a more traditional Cornell box scene for debugging
+    // builds a traditional Cornell box scene
     // materials
+
     let mat_white = Phong::new(
         Colour::from_rgb(0.1, 0.1, 0.1),
         Colour::from_rgb(0.6, 0.6, 0.6),
@@ -310,7 +344,9 @@ fn build_c_box(scene: &mut Scene) {
         Colour::from_rgb(0.5, 0.5, 0.5),
         40.,
     );
-    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 1., 1.));
+
+    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(0.95, 0.95, 0.95));
+    let mat_metal = Metallic::new(Colour::from_rgb(0.9, 0.9, 1.), 0.05);
 
     // floor
     scene.add_object(Triangle::new(
@@ -402,36 +438,28 @@ fn build_c_box(scene: &mut Scene) {
         mat_white,
     ));
 
-    let spherel = Sphere::new(Vec3A::new(0., -0.4, 3.5), 0.4, mat_glass);
-    let spherem = Sphere::new(Vec3A::new(0., -0.5, 5.), 0.4, mat_white);
-    let spherer = Sphere::new(
-        Vec3A::new(0.8, -0.5, 5.),
-        0.4,
-        Metallic::new(Colour::from_rgb(0.7, 0.7, 0.7), 0.),
-    );
-
-    scene.add_object(spherel);
-    scene.add_object(spherem);
-    scene.add_object(spherer);
+    scene.add_object(Sphere::new(Vec3A::new(-1.2, 0., 5.5), 0.6, mat_white));
+    scene.add_object(Sphere::new(Vec3A::new(0., 0.5, 5.5), 0.6, mat_glass));
+    scene.add_object(Sphere::new(Vec3A::new(1.2, -0.5, 5.5), 0.6, mat_metal));
 
     // lights
     scene.add_light(Point::new(
-        Vec3A::new(0., 2., 3.),
+        Vec3A::new(0., 2.5, 3.),
         Colour::from_rgba(1., 1., 1., 0.),
     ));
 }
 
-#[allow(dead_code)]
-fn build_scene(scene: &mut Scene) {
+fn build_material_scene(scene: &mut Scene) {
     // create materials
     let mat_white = Diffuse::new(Colour::from_rgb(0.6, 0.6, 0.6));
     let mat_red = Diffuse::new(Colour::from_rgb(0.6, 0., 0.));
     let mat_green = Diffuse::new(Colour::from_rgb(0., 0.6, 0.));
-    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 0.9, 0.8));
+    let mat_glass = Dielectric::new(1.52, Colour::from_rgb(1., 1., 1.));
+    let mat_glass_red = Dielectric::new(1.52, Colour::from_rgb(1., 0.8, 0.8));
     let mat_metal = Metallic::new(Colour::from_rgb(0.8, 0.8, 1.), 0.);
 
     // create teapot
-    let mut pm = PolyMesh::new("teapot_smaller.ply", true, false, mat_glass);
+    let mut pm = PolyMesh::new("teapot_smaller.ply", true, false, mat_glass_red);
     pm.apply_transform(Affine3A::from_scale(Vec3::new(0.6, 0.6, 0.6)));
     pm.apply_transform(Affine3A::from_rotation_z(0.5));
     pm.apply_transform(Affine3A::from_cols(

@@ -5,7 +5,7 @@ use glam::{Affine3A, Vec3A};
 use super::Object;
 use crate::{
     hit::Hit,
-    material::{normalshading::NormalShading, Material},
+    material::{Material},
     ray::Ray,
     Vertex,
 };
