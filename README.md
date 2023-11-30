@@ -23,4 +23,24 @@ This application is a ray tracer that renders a 3D scene containing different ob
 
 Rust is required to run this project. You can install the Rust compiler using [Rustup](https://rustup.rs).
 
-Run `cargo run` to build and run the project. Beware that without changes, this will generate a  very high quality image (1024 x 1024) and take a long time. The output image will appear in the root directory as `test.png` and may look something like [this example](images/exampleoutput.png).
+Run `cargo run` to build and run the project. Beware that without changes, this will generate a  very high quality image (1024 x 1024) and take a long time. 
+
+The following command can be run to produce an image with the default 500 samples and 512 by 512 resolution:
+
+```bash
+cargo run --package raytracer --release -- -s [SCENE]
+```
+
+where `[SCENE]` can be one of the following: `cornell`, `full` or `material` to change the contents of the output. The number of samples and resolution can be changed by using `--samples` and `-r` respectively.
+
+The output image will appear in the root directory as `test.png` and may look something like [this example](images/exampleoutput.png), which is the full scene rendered with 1000 samples and 1024 resolution.
+
+### Cargo Features
+
+The "unfinished" feature contains the incomplete photon mapping and caustics map, and can be activated by adding `--all-features` to the cargo command like so:
+
+```bash
+cargo run --package raytracer --release --all-features -- -s [SCENE]
+```
+
+This will not produce a realistic render and will take *significantly longer* than a normal run.
