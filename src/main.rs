@@ -78,18 +78,23 @@ fn main() {
     );
 
     // build caustics map WARNING: SLOW
-    // let mut photons_fb = FrameBuffer::default();
-    // let caustic_pmap = PhotonMap::build(&scene);
+    #[cfg(feature = "unfinished")]
+    let mut photons_fb = FrameBuffer::new(args.resolution, args.resolution);
+    #[cfg(feature = "unfinished")]
+    let _caustic_pmap = PhotonMap::build(&scene);
 
     // camera generates rays for each pixel in the framebuffer and records colour + depth.
     let pmap = PhotonMap::build(&scene);
     camera.render(&scene, &mut fb, &pmap);
 
-    // build the visualisation for the photon map for debugging WARNING: SLOW
-    // camera.visualise_photons(&pmap, &scene, &mut photons_fb);
+    #[cfg(feature = "unfinished")]
+    {
+        // build the visualisation for the photon map for debugging WARNING: SLOW
+        camera.visualise_photons(&pmap, &scene, &mut photons_fb);
 
-    // add the caustics map to the frame buffer
-    // fb = fb.add_caustics(&photons_fb);
+        // add the caustics map to the frame buffer
+        fb = fb.add_caustics(&photons_fb);
+    }
 
     // output the framebuffer colour and depth, and the photon map visualisation
     fb.write_rgb_png("test.png")
@@ -97,8 +102,11 @@ fn main() {
     fb.write_depth_png("depth.png")
         .expect("failed to write depth output to PNG file");
 
-    // write photon map visualisation for debugging
-    // photons_fb.write_rgb_png("photons.png").expect("f");
+    #[cfg(feature = "unfinished")]
+    {
+        // write photon map visualisation for debugging
+        photons_fb.write_rgb_png("photons.png").expect("f");
+    }
 }
 
 fn build_final_scene(scene: &mut Scene) {
