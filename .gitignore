@@ -1,9 +1,6 @@
 /target
 /.idea
-test.ppm
-test.png
-depth.ppm
-depth.png
+/*.png
 
 /report/build
 /report/.vscode
